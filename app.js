@@ -43,13 +43,13 @@ app.use(express.static('public'));
  */
 
 // App Secret can be retrieved from the App Dashboard
-const APP_SECRET = "5fb9b6ee15aa4c0770bae1074b37dbff" ;
+const APP_SECRET = process.env.APP_SECRET;
 
 // Arbitrary value used to validate a webhook
-const VALIDATION_TOKEN = "f789209hgUIOG674957344726dyjrryr46286854XCI75R395E75ie5738235903xocivbN638C5CE7VTI4c397ivr6I639C";
+const VALIDATION_TOKEN = process.env.VALIDATION_TOKEN;
 
 // Generate a page access token for your page from the App Dashboard
-const PAGE_ACCESS_TOKEN = "EAAFKGOxTxGEBAFk5gMWOWbedQTraaWZBmqATe8wDpJK25zpKgylHsvSND6DuPil6izxvZA9tWNFZAZA4btI9LeUJVG69z5CdumVvan28YOthm8s4cd3bKKOzUFBhRsnCo4C4REn7F9vk7QrDjjZAOA98x9JBvpA4w0z0vGkRlwAZDZD";
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
   console.error("Missing config values");
