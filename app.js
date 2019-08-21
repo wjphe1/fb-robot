@@ -119,7 +119,7 @@ app.post('/webhook', function (req, res) {
   }
 });
 
-app.get('/', function (req, res) {
+app.get('/setup', function (req, res) {
 
   setupGetStartedButton();
 });
