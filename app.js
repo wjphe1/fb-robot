@@ -119,6 +119,12 @@ app.post('/webhook', function (req, res) {
   }
 });
 
+app.get('/setup',function(req,res){
+
+  setupGetStartedButton(res);
+});
+
+
 /*
  * Verify that the callback came from Facebook. Using the App Secret from 
  * the App Dashboard, we can verify the signature that is sent with each 
@@ -299,23 +305,23 @@ function handleReceivedMessage(event) {
           sendTextMessage(senderID, firstName);
         break
 
-      case 'add menu':
+      /* case 'add menu':
         addPersistentMenu();
         break
 
       case 'remove menu':
         removePersistentMenu();
-        break
-        
+        break */
+
       case 'stop': // Stop the Bot from responding if the admin sends this messages
-        if (senderID == 1073962542672604) {
+        if (senderID == 2464058527010934) {
           console.log("Stoppping bot");
           isStopped = true;
         }
         break
 
       case 'start': // start up again
-        if (senderID == 1073962542672604) {
+        if (senderID == 2464058527010934) {
           console.log("Starting bot");
           isStopped = false;
         }
@@ -1109,7 +1115,7 @@ function callGetLocaleAPI(event, handleReceived) {
   });
 }
 
-function addPersistentMenu() {
+function setupGetStartedButton() {
   request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
     qs: {
@@ -1213,7 +1219,7 @@ function addPersistentMenu() {
 
 }
 
-function removePersistentMenu() {
+/* function removePersistentMenu() {
   request({
     url: 'https://graph.facebook.com/v2.6/me/thread_settings',
     qs: {
@@ -1234,7 +1240,7 @@ function removePersistentMenu() {
       console.log('Error: ', response.body.error)
     }
   })
-}
+} */
 
 function addKeywordStep1(recipientId) {
   sendTextMessage(recipientId, "The keyword will drive the actions by the Bot.  The user can type in the keyword or it can be triggered by a link.  The keyword can contain letters, numbers and spaces. Please type in the keyword:");
