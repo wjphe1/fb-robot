@@ -306,11 +306,7 @@ function handleReceivedMessage(event) {
       case 'remove menu':
         removePersistentMenu();
         break
-      
-      case 'send me':
-        SendMessageToSpecificUser();
-        break
-
+        
       case 'stop': // Stop the Bot from responding if the admin sends this messages
         if (senderID == 1073962542672604) {
           console.log("Stoppping bot");
@@ -1111,34 +1107,6 @@ function callGetLocaleAPI(event, handleReceived) {
   req.on('error', function (e) {
     console.log('ERROR: ' + e.message);
   });
-}
-
-function SendMessageToSpecificUser(recipientID) {
-  request({
-        url: 'https://graph.facebook.com/v2.6/me/broadcast_messages',
-        qs: {
-          access_token: PAGE_ACCESS_TOKEN
-        },
-        method: 'POST',
-        json: {
-          "messaging_type": "RESPONSE",
-          "recipient": {
-            "id": recipientID;
-          },
-          "message": {
-            "text": "hello, world!"
-          }
-        }
-      }
-    },
-    function (error, response, body) {
-      console.log("Send specific message " + response)
-      if (error) {
-        console.log('Error sending specific messages: ', error)
-      } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
-      }
-    })
 }
 
 function addPersistentMenu() {
