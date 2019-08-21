@@ -22,8 +22,8 @@
             },
             {
               "type": "postback",
-              "title": "I want a Bot!",
-              "payload": "I want one"
+              "title": "Send Me",
+              "payload": "send me"
             }
             ]
           }, 
@@ -40,13 +40,13 @@
             }, 
             {
               "type": "postback",
-              "title": "Social media",
-              "payload": "Social media"
+              "title": "remove menu",
+              "payload": "remove menu"
             },
             {
               "type": "postback",
-              "title": "Matthew's bio",
-              "payload": "bio"
+              "title": "add menu",
+              "payload": "add menu"
             }
             ]
           }, 

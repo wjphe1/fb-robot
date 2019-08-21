@@ -4,7 +4,7 @@
         {
           "content_type":"text",
           "title":"Select Date",
-          "payload":"contact"
+          "payload":"selectdate"
         },
         {
           "content_type":"text",
