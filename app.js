@@ -1116,6 +1116,7 @@ function callGetLocaleAPI(event, handleReceived) {
 }
 
 function setupGetStartedButton() {
+  
   request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
     qs: {
@@ -1147,7 +1148,7 @@ function setupGetStartedButton() {
         "text": "Greeting text for default local !"
       }, {
         "locale": "en_US",
-        "text": "Hello There! Let's get started."
+        "text": "Hello There! Let's get started right away!"
       }]
     }
   }, function (error, response, body) {
@@ -1187,9 +1188,9 @@ function setupGetStartedButton() {
                   "payload": "joke"
                 },
                 {
-                  "title": "Contact Info",
+                  "title": "Technical",
                   "type": "postback",
-                  "payload": "CONTACT"
+                  "payload": "TECHNICAL"
                 }
               ]
             },
