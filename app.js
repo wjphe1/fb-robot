@@ -1146,6 +1146,27 @@ function addPersistentMenu(){
     }
 })
  request({
+  url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+  qs: { access_token: PAGE_ACCESS_TOKEN },
+  method: 'POST',
+  json:{
+    "greeting": [{
+			"locale": "default",
+			"text": "Greeting text for default local !"
+		}, {
+			"locale": "en_US",
+			"text": "Hello There! Let's get started."
+		}]
+}
+}, function(error, response, body) {
+  console.log("Add persistent menu " + response)
+  if (error) {
+      console.log('Error sending messages: ', error)
+  } else if (response.body.error) {
+      console.log('Error: ', response.body.error)
+  }
+})
+ request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
     qs: { access_token: PAGE_ACCESS_TOKEN },
     method: 'POST',
