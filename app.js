@@ -119,9 +119,9 @@ app.post('/webhook', function (req, res) {
   }
 });
 
-app.get('/setup',function(req,res){
+app.get('/', function (req, res) {
 
-  setupGetStartedButton(res);
+  setupGetStartedButton();
 });
 
 
@@ -305,13 +305,13 @@ function handleReceivedMessage(event) {
           sendTextMessage(senderID, firstName);
         break
 
-      /* case 'add menu':
-        addPersistentMenu();
-        break
+        /* case 'add menu':
+          addPersistentMenu();
+          break
 
-      case 'remove menu':
-        removePersistentMenu();
-        break */
+        case 'remove menu':
+          removePersistentMenu();
+          break */
 
       case 'stop': // Stop the Bot from responding if the admin sends this messages
         if (senderID == 2464058527010934) {
@@ -1116,7 +1116,7 @@ function callGetLocaleAPI(event, handleReceived) {
 }
 
 function setupGetStartedButton() {
-  
+
   request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
     qs: {
@@ -1148,7 +1148,7 @@ function setupGetStartedButton() {
         "text": "Greeting text for default local !"
       }, {
         "locale": "en_US",
-        "text": "Hello There! Let's get started right away!"
+        "text": "LETS GET THE SHIT ROLLING!"
       }]
     }
   }, function (error, response, body) {
