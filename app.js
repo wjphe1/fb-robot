@@ -122,6 +122,7 @@ app.post('/webhook', function (req, res) {
 app.get('/setup', function (req, res) {
 
   setupGetStartedButton();
+  AddPersistentMenu();
 });
 
 
@@ -1148,7 +1149,7 @@ function setupGetStartedButton() {
         "text": "Greeting text for default local !"
       }, {
         "locale": "en_US",
-        "text": "LETS GET THE SHIT ROLLING!"
+        "text": "LETS GET THE SHIT ROLLING TWICE!"
       }]
     }
   }, function (error, response, body) {
@@ -1159,6 +1160,9 @@ function setupGetStartedButton() {
       console.log('Error: ', response.body.error)
     }
   })
+}
+
+function AddPersistentMenu() {
   request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
     qs: {
@@ -1217,7 +1221,6 @@ function setupGetStartedButton() {
       console.log('Error: ', response.body.error)
     }
   })
-
 }
 
 /* function removePersistentMenu() {
