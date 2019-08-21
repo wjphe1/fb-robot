@@ -793,8 +793,8 @@ function sendGenericMessage(recipientId) {
             "buttons": [
             {
               "type": "postback",
-              "title": "What is this Bot?",
-              "payload": "What is this Robot?"
+              "title": "Make an Appointment",
+              "payload": "appointment"
             },
             {
               "type": "postback",
