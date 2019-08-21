@@ -11,18 +11,18 @@
 'use strict';
 
 var customRules = {};
-const 
+const
   bodyParser = require('body-parser'),
   crypto = require('crypto'),
   express = require('express'),
-  https = require('https'),  
+  https = require('https'),
   request = require('request');
 
 var fs = require('fs');
 
 const _ = require('lodash');
-const   scriptRules = require('./script.json');
-const   jokes = require('./script/JOKES.json');
+const scriptRules = require('./script.json');
+const jokes = require('./script/JOKES.json');
 
 
 var previousMessageHash = {};
@@ -33,7 +33,9 @@ var isStopped = false;
 var app = express();
 
 app.set('port', process.env.PORT || 5000);
-app.use(bodyParser.json({ verify: verifyRequestSignature }));
+app.use(bodyParser.json({
+  verify: verifyRequestSignature
+}));
 app.use(express.static('public'));
 
 /*
@@ -61,15 +63,15 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
  * setup is the same token used here.
  *
  */
-app.get('/webhook', function(req, res) {
+app.get('/webhook', function (req, res) {
   if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === VALIDATION_TOKEN) {
+    req.query['hub.verify_token'] === VALIDATION_TOKEN) {
     console.log("Validating webhook");
     res.status(200).send(req.query['hub.challenge']);
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);          
-  }  
+    res.sendStatus(403);
+  }
 });
 
 
@@ -87,12 +89,12 @@ app.post('/webhook', function (req, res) {
   if (data.object == 'page') {
     // Iterate over each entry
     // There may be multiple if batched
-    data.entry.forEach(function(pageEntry) {
+    data.entry.forEach(function (pageEntry) {
       var pageID = pageEntry.id;
       var timeOfEvent = pageEntry.time;
 
       // Iterate over each messaging event
-      pageEntry.messaging.forEach(function(messagingEvent) {
+      pageEntry.messaging.forEach(function (messagingEvent) {
         if (messagingEvent.optin) {
           receivedAuthentication(messagingEvent);
         } else if (messagingEvent.message) {
@@ -138,8 +140,8 @@ function verifyRequestSignature(req, res, buf) {
     var signatureHash = elements[1];
 
     var expectedHash = crypto.createHmac('sha1', APP_SECRET)
-                        .update(buf)
-                        .digest('hex');
+      .update(buf)
+      .digest('hex');
 
     if (signatureHash != expectedHash) {
       throw new Error("Couldn't validate the request signature: " + APP_SECRET);
@@ -156,8 +158,7 @@ function verifyRequestSignature(req, res, buf) {
  *
  */
 function receivedAuthentication(event) {
-  if(isStopped == true)
-  {
+  if (isStopped == true) {
     return;
   }
   var data = req.body;
@@ -173,7 +174,7 @@ function receivedAuthentication(event) {
   var passThroughParam = event.optin.ref;
 
   console.log("Received authentication for user %d and page %d with pass " +
-    "through param '%s' at %d", senderID, recipientID, passThroughParam, 
+    "through param '%s' at %d", senderID, recipientID, passThroughParam,
     timeOfAuth);
 
   // When an authentication is received, we'll send a message back to the sender
@@ -182,7 +183,7 @@ function receivedAuthentication(event) {
 }
 
 var firstName = "undefined";
-var lastName = "undefined"; 
+var lastName = "undefined";
 
 /*
  * Message Event
@@ -199,7 +200,7 @@ var lastName = "undefined";
  * 
  */
 function receivedMessage(event) {
-      callGetLocaleAPI(event, handleReceivedMessage);
+  callGetLocaleAPI(event, handleReceivedMessage);
 }
 
 function handleReceivedMessage(event) {
@@ -221,25 +222,25 @@ function handleReceivedMessage(event) {
 
   if (isEcho) {
     // Just logging message echoes to console
-    console.log("Received echo for message %s and app %d with metadata %s", 
+    console.log("Received echo for message %s and app %d with metadata %s",
       messageId, appId, metadata);
     return;
   } else if (quickReply) {
     var quickReplyPayload = quickReply.payload;
-//    console.log("Quick reply for message %s with payload %s",
- //     messageId, quickReplyPayload);
+    //    console.log("Quick reply for message %s with payload %s",
+    //     messageId, quickReplyPayload);
 
     messageText = quickReplyPayload;
-    sendCustomMessage(senderID,messageText);
+    sendCustomMessage(senderID, messageText);
     return;
   }
 
   if (messageText) {
-    if((isStopped == true) && (messageText !== "start")){
+    if ((isStopped == true) && (messageText !== "start")) {
       return;
     }
-  console.log("Received message for user %d and page %d at %d with message: %s", 
-    senderID, recipientID, timeOfMessage,messageText);
+    console.log("Received message for user %d and page %d at %d with message: %s",
+      senderID, recipientID, timeOfMessage, messageText);
 
     // If we receive a text message, check to see if it matches any special
     // keywords and send back the corresponding example. Otherwise, just echo
@@ -279,54 +280,58 @@ function handleReceivedMessage(event) {
 
       case 'quick reply':
         sendQuickReply(senderID);
-        break        
+        break
 
       case 'read receipt':
         sendReadReceipt(senderID);
-        break        
+        break
 
       case 'typing on':
         sendTypingOn(senderID);
-        break        
+        break
 
       case 'typing off':
         sendTypingOff(senderID);
-        break        
+        break
 
       case 'user info':
-        if(firstName)
-            sendTextMessage(senderID,firstName);
-        break        
+        if (firstName)
+          sendTextMessage(senderID, firstName);
+        break
 
       case 'add menu':
         addPersistentMenu();
-        break        
+        break
 
       case 'remove menu':
         removePersistentMenu();
-        break        
+        break
+      
+      case 'send me':
+        SendMessageToSpecificUser();
+        break
 
-      case 'stop':  // Stop the Bot from responding if the admin sends this messages
-         if(senderID ==  1073962542672604) {
-            console.log("Stoppping bot");
-            isStopped = true;
-         }
-         break
+      case 'stop': // Stop the Bot from responding if the admin sends this messages
+        if (senderID == 1073962542672604) {
+          console.log("Stoppping bot");
+          isStopped = true;
+        }
+        break
 
       case 'start': // start up again
-         if(senderID ==  1073962542672604)  {
-            console.log("Starting bot");
-            isStopped = false;
-         }
-         break
+        if (senderID == 1073962542672604) {
+          console.log("Starting bot");
+          isStopped = false;
+        }
+        break
 
       default:
-         sendEnteredMessage(senderID, messageText);
+        sendEnteredMessage(senderID, messageText);
 
     }
   } else if (messageAttachments) {
-    if(messageAttachments[0].payload.url)
-        sendJsonMessage(senderID, messageAttachments[0].payload.url);
+    if (messageAttachments[0].payload.url)
+      sendJsonMessage(senderID, messageAttachments[0].payload.url);
   }
 }
 
@@ -340,8 +345,7 @@ function handleReceivedMessage(event) {
  */
 
 function receivedDeliveryConfirmation(event) {
-  if(isStopped == true)
-  {
+  if (isStopped == true) {
     return;
   }
   var senderID = event.sender.id;
@@ -352,8 +356,8 @@ function receivedDeliveryConfirmation(event) {
   var sequenceNumber = delivery.seq;
 
   if (messageIDs) {
-    messageIDs.forEach(function(messageID) {
-      console.log("Received delivery confirmation for message ID: %s", 
+    messageIDs.forEach(function (messageID) {
+      console.log("Received delivery confirmation for message ID: %s",
         messageID);
     });
   }
@@ -371,8 +375,7 @@ function receivedDeliveryConfirmation(event) {
  */
 
 function receivedPostback(event) {
-  if(isStopped == true)
-  {
+  if (isStopped == true) {
     return;
   }
   callGetLocaleAPI(event, handleReceivedPostback);
@@ -387,12 +390,12 @@ function handleReceivedPostback(event) {
   // button for Structured Messages. 
   var payload = event.postback.payload;
 
-  console.log("Received postback for user %d and page %d with payload '%s' " + 
+  console.log("Received postback for user %d and page %d with payload '%s' " +
     "at %d", senderID, recipientID, payload, timeOfPostback);
 
   // When a postback is called, we'll send a message back to the sender to 
   // let them know it was successful
-  sendCustomMessage(senderID,payload);
+  sendCustomMessage(senderID, payload);
 }
 
 /*
@@ -403,8 +406,7 @@ function handleReceivedPostback(event) {
  * 
  */
 function receivedMessageRead(event) {
-  if(isStopped == true)
-  {
+  if (isStopped == true) {
     return;
   }
   var senderID = event.sender.id;
@@ -528,116 +530,111 @@ function sendFileMessage(recipientId) {
   callSendAPI(messageData);
 }
 
-function sendSingleJsonMessage(recipientId,filename) {
-   try {
-      filename = "./script/" + filename;
-      var json  = require(filename);
-      var fullMessage = { recipient: { id: recipientId  }};
-      fullMessage.message = json;
-      callSendAPI(fullMessage);
-   }
-   catch (e)
-   {
-      console.log("error in sendSingleJsonMessage " + e.message + " " + filename + " " + fullMessage);
-   }
+function sendSingleJsonMessage(recipientId, filename) {
+  try {
+    filename = "./script/" + filename;
+    var json = require(filename);
+    var fullMessage = {
+      recipient: {
+        id: recipientId
+      }
+    };
+    fullMessage.message = json;
+    callSendAPI(fullMessage);
+  } catch (e) {
+    console.log("error in sendSingleJsonMessage " + e.message + " " + filename + " " + fullMessage);
+  }
 }
 
 /* 
    Special handling for message that the sender typed in 
 */
 
-function sendEnteredMessage(recipientId,messageText) {
-                var emojiString = ["😀","😁","😂","😃","😄","😅","😆","😇","😈","👿","😉","😊","☺️","😋","😌","😍","😎","😏","😐","😑","😒","😓","😔","😕","😖","😗","😘","😙","😚","😛","😜","😝","😞","😟","😠","😡","😢","😣","😤","😥","😦","😧","😨","😩","😪","😫","😬","😭","😮","😯","😰","😱","😲","😳","😴","😵","😶","😷","😸","😹","😺","😻","😼","😽","😾","😿","🙀","👣","👤","👥","👶","👶🏻","👶🏼","👶🏽","👶🏾","👶🏿","👦","👦🏻","👦🏼","👦🏽","👦🏾","👦🏿","👧","👧🏻","👧🏼","👧🏽","👧🏾","👧🏿","👨","👨🏻","👨🏼","👨🏽","👨🏾","👨🏿","👩","👩🏻","👩🏼","👩🏽","👩🏾","👩🏿","👪","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👩‍👩‍👦","👩‍👩‍👧","👩‍👩‍👧‍👦","👩‍👩‍👦‍👦","👩‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👨‍👨‍👧‍👦","👨‍👨‍👦‍👦","👨‍👨‍👧‍👧","👫","👬","👭","👯","👰","👰🏻","👰🏼","👰🏽","👰🏾","👰🏿","👱","👱🏻","👱🏼","👱🏽","👱🏾","👱🏿","👲","👲🏻","👲🏼","👲🏽","👲🏾","👲🏿","👳","👳🏻","👳🏼","👳🏽","👳🏾","👳🏿","👴","👴🏻","👴🏼","👴🏽","👴🏾","👴🏿","👵","👵🏻","👵🏼","👵🏽","👵🏾","👵🏿","👮","👮🏻","👮🏼","👮🏽","👮🏾","👮🏿","👷","👷🏻","👷🏼","👷🏽","👷🏾","👷🏿","👸","👸🏻","👸🏼","👸🏽","👸🏾","👸🏿","💂","💂🏻","💂🏼","💂🏽","💂🏾","💂🏿","👼","👼🏻","👼🏼","👼🏽","👼🏾","👼🏿","🎅","🎅🏻","🎅🏼","🎅🏽","🎅🏾","🎅🏿","👻","👹","👺","💩","💀","👽","👾","🙇","🙇🏻","🙇🏼","🙇🏽","🙇🏾","🙇🏿","💁","💁🏻","💁🏼","💁🏽","💁🏾","💁🏿","🙅","🙅🏻","🙅🏼","🙅🏽","🙅🏾","🙅🏿","🙆","🙆🏻","🙆🏼","🙆🏽","🙆🏾","🙆🏿","🙋","🙋🏻","🙋🏼","🙋🏽","🙋🏾","🙋🏿","🙎","🙎🏻","🙎🏼","🙎🏽","🙎🏾","🙎🏿","🙍","🙍🏻","🙍🏼","🙍🏽","🙍🏾","🙍🏿","💆","💆🏻","💆🏼","💆🏽","💆🏾","💆🏿","💇","💇🏻","💇🏼","💇🏽","💇🏾","💇🏿","💑","👩‍❤️‍👩","👨‍❤️‍👨","💏","👩‍❤️‍💋‍👩","👨‍❤️‍💋‍👨","🙌","🙌🏻","🙌🏼","🙌🏽","🙌🏾","🙌🏿","👏","👏🏻","👏🏼","👏🏽","👏🏾","👏🏿","👂","👂🏻","👂🏼","👂🏽","👂🏾","👂🏿","👀","👃","👃🏻","👃🏼","👃🏽","👃🏾","👃🏿","👄","💋","👅","💅","💅🏻","💅🏼","💅🏽","💅🏾","💅🏿","👋","👋🏻","👋🏼","👋🏽","👋🏾","👋🏿","👍","👍🏻","👍🏼","👍🏽","👍🏾","👍🏿","👎","👎🏻","👎🏼","👎🏽","👎🏾","👎🏿","☝","☝🏻","☝🏼","☝🏽","☝🏾","☝🏿","👆","👆🏻","👆🏼","👆🏽","👆🏾","👆🏿","👇","👇🏻","👇🏼","👇🏽","👇🏾","👇🏿","👈","👈🏻","👈🏼","👈🏽","👈🏾","👈🏿","👉","👉🏻","👉🏼","👉🏽","👉🏾","👉🏿","👌","👌🏻","👌🏼","👌🏽","👌🏾","👌🏿","✌","✌🏻","✌🏼","✌🏽","✌🏾","✌🏿","👊","👊🏻","👊🏼","👊🏽","👊🏾","👊🏿","✊","✊🏻","✊🏼","✊🏽","✊🏾","✊🏿","✋","✋🏻","✋🏼","✋🏽","✋🏾","✋🏿","💪","💪🏻","💪🏼","💪🏽","💪🏾","💪🏿","👐","👐🏻","👐🏼","👐🏽","👐🏾","👐🏿","🙏","🙏🏻","🙏🏼","🙏🏽","🙏🏾","🙏🏿","🌱","🌲","🌳","🌴","🌵","🌷","🌸","🌹","🌺","🌻","🌼","💐","🌾","🌿","🍀","🍁","🍂","🍃","🍄","🌰","🐀","🐁","🐭","🐹","🐂","🐃","🐄","🐮","🐅","🐆","🐯","🐇","🐰","🐈","🐱","🐎","🐴","🐏","🐑","🐐","🐓","🐔","🐤","🐣","🐥","🐦","🐧","🐘","🐪","🐫","🐗","🐖","🐷","🐽","🐕","🐩","🐶","🐺","🐻","🐨","🐼","🐵","🙈","🙉","🙊","🐒","🐉","🐲","🐊","🐍","🐢","🐸","🐋","🐳","🐬","🐙","🐟","🐠","🐡","🐚","🐌","🐛","🐜","🐝","🐞","🐾","⚡️","🔥","🌙","☀️","⛅️","☁️","💧","💦","☔️","💨","❄️","🌟","⭐️","🌠","🌄","🌅","🌈","🌊","🌋","🌌","🗻","🗾","🌐","🌍","🌎","🌏","🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘","🌚","🌝","🌛","🌜","🌞","🍅","🍆","🌽","🍠","🍇","🍈","🍉","🍊","🍋","🍌","🍍","🍎","🍏","🍐","🍑","🍒","🍓","🍔","🍕","🍖","🍗","🍘","🍙","🍚","🍛","🍜","🍝","🍞","🍟","🍡","🍢","🍣","🍤","🍥","🍦","🍧","🍨","🍩","🍪","🍫","🍬","🍭","🍮","🍯","🍰","🍱","🍲","🍳","🍴","🍵","☕️","🍶","🍷","🍸","🍹","🍺","🍻","🍼","🎀","🎁","🎂","🎃","🎄","🎋","🎍","🎑","🎆","🎇","🎉","🎊","🎈","💫","✨","💥","🎓","👑","🎎","🎏","🎐","🎌","🏮","💍","❤️","💔","💌","💕","💞","💓","💗","💖","💘","💝","💟","💜","💛","💚","💙","🏃","🏃🏻","🏃🏼","🏃🏽","🏃🏾","🏃🏿","🚶","🚶🏻","🚶🏼","🚶🏽","🚶🏾","🚶🏿","💃","💃🏻","💃🏼","💃🏽","💃🏾","💃🏿","🚣","🚣🏻","🚣🏼","🚣🏽","🚣🏾","🚣🏿","🏊","🏊🏻","🏊🏼","🏊🏽","🏊🏾","🏊🏿","🏄","🏄🏻","🏄🏼","🏄🏽","🏄🏾","🏄🏿","🛀","🛀🏻","🛀🏼","🛀🏽","🛀🏾","🛀🏿","🏂","🎿","⛄️","🚴","🚴🏻","🚴🏼","🚴🏽","🚴🏾","🚴🏿","🚵","🚵🏻","🚵🏼","🚵🏽","🚵🏾","🚵🏿","🏇","🏇🏻","🏇🏼","🏇🏽","🏇🏾","🏇🏿","⛺️","🎣","⚽️","🏀","🏈","⚾️","🎾","🏉","⛳️","🏆","🎽","🏁","🎹","🎸","🎻","🎷","🎺","🎵","🎶","🎼","🎧","🎤","🎭","🎫","🎩","🎪","🎬","🎨","🎯","🎱","🎳","🎰","🎲","🎮","🎴","🃏","🀄️","🎠","🎡","🎢","🚃","🚞","🚂","🚋","🚝","🚄","🚅","🚆","🚇","🚈","🚉","🚊","🚌","🚍","🚎","🚐","🚑","🚒","🚓","🚔","🚨","🚕","🚖","🚗","🚘","🚙","🚚","🚛","🚜","🚲","🚏","⛽️","🚧","🚦","🚥","🚀","🚁","✈️","💺","⚓️","🚢","🚤","⛵️","🚡","🚠","🚟","🛂","🛃","🛄","🛅","💴","💶","💷","💵","🗽","🗿","🌁","🗼","⛲️","🏰","🏯","🌇","🌆","🌃","🌉","🏠","🏡","🏢","🏬","🏭","🏣","🏤","🏥","🏦","🏨","🏩","💒","⛪️","🏪","🏫","🇦🇺","🇦🇹","🇧🇪","🇧🇷","🇨🇦","🇨🇱","🇨🇳","🇨🇴","🇩🇰","🇫🇮","🇫🇷","🇩🇪","🇭🇰","🇮🇳","🇮🇩","🇮🇪","🇮🇱","🇮🇹","🇯🇵","🇰🇷","🇲🇴","🇲🇾","🇲🇽","🇳🇱","🇳🇿","🇳🇴","🇵🇭","🇵🇱","🇵🇹","🇵🇷","🇷🇺","🇸🇦","🇸🇬","🇿🇦","🇪🇸","🇸🇪","🇨🇭","🇹🇷","🇬🇧","🇺🇸","🇦🇪","🇻🇳","⌚️","📱","📲","💻","⏰","⏳","⌛️","📷","📹","🎥","📺","📻","📟","📞","☎️","📠","💽","💾","💿","📀","📼","🔋","🔌","💡","🔦","📡","💳","💸","💰","💎","🌂","👝","👛","👜","💼","🎒","💄","👓","👒","👡","👠","👢","👞","👟","👙","👗","👘","👚","👕","👔","👖","🚪","🚿","🛁","🚽","💈","💉","💊","🔬","🔭","🔮","🔧","🔪","🔩","🔨","💣","🚬","🔫","🔖","📰","🔑","✉️","📩","📨","📧","📥","📤","📦","📯","📮","📪","📫","📬","📭","📄","📃","📑","📈","📉","📊","📅","📆","🔅","🔆","📜","📋","📖","📓","📔","📒","📕","📗","📘","📙","📚","📇","🔗","📎","📌","✂️","📐","📍","📏","🚩","📁","📂","✒️","✏️","📝","🔏","🔐","🔒","🔓","📣","📢","🔈","🔉","🔊","🔇","💤","🔔","🔕","💭","💬","🚸","🔍","🔎","🚫","⛔️","📛","🚷","🚯","🚳","🚱","📵","🔞","🉑","🉐","💮","㊙️","㊗️","🈴","🈵","🈲","🈶","🈚️","🈸","🈺","🈷","🈹","🈳","🈂","🈁","🈯️","💹","❇️","✳️","❎","✅","✴️","📳","📴","🆚","🅰","🅱","🆎","🆑","🅾","🆘","🆔","🅿️","🚾","🆒","🆓","🆕","🆖","🆗","🆙","🏧","♈️","♉️","♊️","♋️","♌️","♍️","♎️","♏️","♐️","♑️","♒️","♓️","🚻","🚹","🚺","🚼","♿️","🚰","🚭","🚮","▶️","◀️","🔼","🔽","⏩","⏪","⏫","⏬","➡️","⬅️","⬆️","⬇️","↗️","↘️","↙️","↖️","↕️","↔️","🔄","↪️","↩️","⤴️","⤵️","🔀","🔁","🔂","#⃣","0⃣","1⃣","2⃣","3⃣","4⃣","5⃣","6⃣","7⃣","8⃣","9⃣","🔟","🔢","🔤","🔡","🔠","ℹ️","📶","🎦","🔣","➕","➖","〰","➗","✖️","✔️","🔃","™","©","®","💱","💲","➰","➿","〽️","❗️","❓","❕","❔","‼️","⁉️","❌","⭕️","💯","🔚","🔙","🔛","🔝","🔜","🌀","Ⓜ️","⛎","🔯","🔰","🔱","⚠️","♨️","♻️","💢","💠","♠️","♣️","♥️","♦️","☑️","⚪️","⚫️","🔘","🔴","🔵","🔺","🔻","🔸","🔹","🔶","🔷","▪️","▫️","⬛️","⬜️","◼️","◻️","◾️","◽️","🔲","🔳","🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛","🕜","🕝","🕞","🕟","🕠","🕡","🕢","🕣","🕤","🕥","🕦","🕧"]
+function sendEnteredMessage(recipientId, messageText) {
+  var emojiString = ["😀", "😁", "😂", "😃", "😄", "😅", "😆", "😇", "😈", "👿", "😉", "😊", "☺️", "😋", "😌", "😍", "😎", "😏", "😐", "😑", "😒", "😓", "😔", "😕", "😖", "😗", "😘", "😙", "😚", "😛", "😜", "😝", "😞", "😟", "😠", "😡", "😢", "😣", "😤", "😥", "😦", "😧", "😨", "😩", "😪", "😫", "😬", "😭", "😮", "😯", "😰", "😱", "😲", "😳", "😴", "😵", "😶", "😷", "😸", "😹", "😺", "😻", "😼", "😽", "😾", "😿", "🙀", "👣", "👤", "👥", "👶", "👶🏻", "👶🏼", "👶🏽", "👶🏾", "👶🏿", "👦", "👦🏻", "👦🏼", "👦🏽", "👦🏾", "👦🏿", "👧", "👧🏻", "👧🏼", "👧🏽", "👧🏾", "👧🏿", "👨", "👨🏻", "👨🏼", "👨🏽", "👨🏾", "👨🏿", "👩", "👩🏻", "👩🏼", "👩🏽", "👩🏾", "👩🏿", "👪", "👨‍👩‍👧", "👨‍👩‍👧‍👦", "👨‍👩‍👦‍👦", "👨‍👩‍👧‍👧", "👩‍👩‍👦", "👩‍👩‍👧", "👩‍👩‍👧‍👦", "👩‍👩‍👦‍👦", "👩‍👩‍👧‍👧", "👨‍👨‍👦", "👨‍👨‍👧", "👨‍👨‍👧‍👦", "👨‍👨‍👦‍👦", "👨‍👨‍👧‍👧", "👫", "👬", "👭", "👯", "👰", "👰🏻", "👰🏼", "👰🏽", "👰🏾", "👰🏿", "👱", "👱🏻", "👱🏼", "👱🏽", "👱🏾", "👱🏿", "👲", "👲🏻", "👲🏼", "👲🏽", "👲🏾", "👲🏿", "👳", "👳🏻", "👳🏼", "👳🏽", "👳🏾", "👳🏿", "👴", "👴🏻", "👴🏼", "👴🏽", "👴🏾", "👴🏿", "👵", "👵🏻", "👵🏼", "👵🏽", "👵🏾", "👵🏿", "👮", "👮🏻", "👮🏼", "👮🏽", "👮🏾", "👮🏿", "👷", "👷🏻", "👷🏼", "👷🏽", "👷🏾", "👷🏿", "👸", "👸🏻", "👸🏼", "👸🏽", "👸🏾", "👸🏿", "💂", "💂🏻", "💂🏼", "💂🏽", "💂🏾", "💂🏿", "👼", "👼🏻", "👼🏼", "👼🏽", "👼🏾", "👼🏿", "🎅", "🎅🏻", "🎅🏼", "🎅🏽", "🎅🏾", "🎅🏿", "👻", "👹", "👺", "💩", "💀", "👽", "👾", "🙇", "🙇🏻", "🙇🏼", "🙇🏽", "🙇🏾", "🙇🏿", "💁", "💁🏻", "💁🏼", "💁🏽", "💁🏾", "💁🏿", "🙅", "🙅🏻", "🙅🏼", "🙅🏽", "🙅🏾", "🙅🏿", "🙆", "🙆🏻", "🙆🏼", "🙆🏽", "🙆🏾", "🙆🏿", "🙋", "🙋🏻", "🙋🏼", "🙋🏽", "🙋🏾", "🙋🏿", "🙎", "🙎🏻", "🙎🏼", "🙎🏽", "🙎🏾", "🙎🏿", "🙍", "🙍🏻", "🙍🏼", "🙍🏽", "🙍🏾", "🙍🏿", "💆", "💆🏻", "💆🏼", "💆🏽", "💆🏾", "💆🏿", "💇", "💇🏻", "💇🏼", "💇🏽", "💇🏾", "💇🏿", "💑", "👩‍❤️‍👩", "👨‍❤️‍👨", "💏", "👩‍❤️‍💋‍👩", "👨‍❤️‍💋‍👨", "🙌", "🙌🏻", "🙌🏼", "🙌🏽", "🙌🏾", "🙌🏿", "👏", "👏🏻", "👏🏼", "👏🏽", "👏🏾", "👏🏿", "👂", "👂🏻", "👂🏼", "👂🏽", "👂🏾", "👂🏿", "👀", "👃", "👃🏻", "👃🏼", "👃🏽", "👃🏾", "👃🏿", "👄", "💋", "👅", "💅", "💅🏻", "💅🏼", "💅🏽", "💅🏾", "💅🏿", "👋", "👋🏻", "👋🏼", "👋🏽", "👋🏾", "👋🏿", "👍", "👍🏻", "👍🏼", "👍🏽", "👍🏾", "👍🏿", "👎", "👎🏻", "👎🏼", "👎🏽", "👎🏾", "👎🏿", "☝", "☝🏻", "☝🏼", "☝🏽", "☝🏾", "☝🏿", "👆", "👆🏻", "👆🏼", "👆🏽", "👆🏾", "👆🏿", "👇", "👇🏻", "👇🏼", "👇🏽", "👇🏾", "👇🏿", "👈", "👈🏻", "👈🏼", "👈🏽", "👈🏾", "👈🏿", "👉", "👉🏻", "👉🏼", "👉🏽", "👉🏾", "👉🏿", "👌", "👌🏻", "👌🏼", "👌🏽", "👌🏾", "👌🏿", "✌", "✌🏻", "✌🏼", "✌🏽", "✌🏾", "✌🏿", "👊", "👊🏻", "👊🏼", "👊🏽", "👊🏾", "👊🏿", "✊", "✊🏻", "✊🏼", "✊🏽", "✊🏾", "✊🏿", "✋", "✋🏻", "✋🏼", "✋🏽", "✋🏾", "✋🏿", "💪", "💪🏻", "💪🏼", "💪🏽", "💪🏾", "💪🏿", "👐", "👐🏻", "👐🏼", "👐🏽", "👐🏾", "👐🏿", "🙏", "🙏🏻", "🙏🏼", "🙏🏽", "🙏🏾", "🙏🏿", "🌱", "🌲", "🌳", "🌴", "🌵", "🌷", "🌸", "🌹", "🌺", "🌻", "🌼", "💐", "🌾", "🌿", "🍀", "🍁", "🍂", "🍃", "🍄", "🌰", "🐀", "🐁", "🐭", "🐹", "🐂", "🐃", "🐄", "🐮", "🐅", "🐆", "🐯", "🐇", "🐰", "🐈", "🐱", "🐎", "🐴", "🐏", "🐑", "🐐", "🐓", "🐔", "🐤", "🐣", "🐥", "🐦", "🐧", "🐘", "🐪", "🐫", "🐗", "🐖", "🐷", "🐽", "🐕", "🐩", "🐶", "🐺", "🐻", "🐨", "🐼", "🐵", "🙈", "🙉", "🙊", "🐒", "🐉", "🐲", "🐊", "🐍", "🐢", "🐸", "🐋", "🐳", "🐬", "🐙", "🐟", "🐠", "🐡", "🐚", "🐌", "🐛", "🐜", "🐝", "🐞", "🐾", "⚡️", "🔥", "🌙", "☀️", "⛅️", "☁️", "💧", "💦", "☔️", "💨", "❄️", "🌟", "⭐️", "🌠", "🌄", "🌅", "🌈", "🌊", "🌋", "🌌", "🗻", "🗾", "🌐", "🌍", "🌎", "🌏", "🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘", "🌚", "🌝", "🌛", "🌜", "🌞", "🍅", "🍆", "🌽", "🍠", "🍇", "🍈", "🍉", "🍊", "🍋", "🍌", "🍍", "🍎", "🍏", "🍐", "🍑", "🍒", "🍓", "🍔", "🍕", "🍖", "🍗", "🍘", "🍙", "🍚", "🍛", "🍜", "🍝", "🍞", "🍟", "🍡", "🍢", "🍣", "🍤", "🍥", "🍦", "🍧", "🍨", "🍩", "🍪", "🍫", "🍬", "🍭", "🍮", "🍯", "🍰", "🍱", "🍲", "🍳", "🍴", "🍵", "☕️", "🍶", "🍷", "🍸", "🍹", "🍺", "🍻", "🍼", "🎀", "🎁", "🎂", "🎃", "🎄", "🎋", "🎍", "🎑", "🎆", "🎇", "🎉", "🎊", "🎈", "💫", "✨", "💥", "🎓", "👑", "🎎", "🎏", "🎐", "🎌", "🏮", "💍", "❤️", "💔", "💌", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "💜", "💛", "💚", "💙", "🏃", "🏃🏻", "🏃🏼", "🏃🏽", "🏃🏾", "🏃🏿", "🚶", "🚶🏻", "🚶🏼", "🚶🏽", "🚶🏾", "🚶🏿", "💃", "💃🏻", "💃🏼", "💃🏽", "💃🏾", "💃🏿", "🚣", "🚣🏻", "🚣🏼", "🚣🏽", "🚣🏾", "🚣🏿", "🏊", "🏊🏻", "🏊🏼", "🏊🏽", "🏊🏾", "🏊🏿", "🏄", "🏄🏻", "🏄🏼", "🏄🏽", "🏄🏾", "🏄🏿", "🛀", "🛀🏻", "🛀🏼", "🛀🏽", "🛀🏾", "🛀🏿", "🏂", "🎿", "⛄️", "🚴", "🚴🏻", "🚴🏼", "🚴🏽", "🚴🏾", "🚴🏿", "🚵", "🚵🏻", "🚵🏼", "🚵🏽", "🚵🏾", "🚵🏿", "🏇", "🏇🏻", "🏇🏼", "🏇🏽", "🏇🏾", "🏇🏿", "⛺️", "🎣", "⚽️", "🏀", "🏈", "⚾️", "🎾", "🏉", "⛳️", "🏆", "🎽", "🏁", "🎹", "🎸", "🎻", "🎷", "🎺", "🎵", "🎶", "🎼", "🎧", "🎤", "🎭", "🎫", "🎩", "🎪", "🎬", "🎨", "🎯", "🎱", "🎳", "🎰", "🎲", "🎮", "🎴", "🃏", "🀄️", "🎠", "🎡", "🎢", "🚃", "🚞", "🚂", "🚋", "🚝", "🚄", "🚅", "🚆", "🚇", "🚈", "🚉", "🚊", "🚌", "🚍", "🚎", "🚐", "🚑", "🚒", "🚓", "🚔", "🚨", "🚕", "🚖", "🚗", "🚘", "🚙", "🚚", "🚛", "🚜", "🚲", "🚏", "⛽️", "🚧", "🚦", "🚥", "🚀", "🚁", "✈️", "💺", "⚓️", "🚢", "🚤", "⛵️", "🚡", "🚠", "🚟", "🛂", "🛃", "🛄", "🛅", "💴", "💶", "💷", "💵", "🗽", "🗿", "🌁", "🗼", "⛲️", "🏰", "🏯", "🌇", "🌆", "🌃", "🌉", "🏠", "🏡", "🏢", "🏬", "🏭", "🏣", "🏤", "🏥", "🏦", "🏨", "🏩", "💒", "⛪️", "🏪", "🏫", "🇦🇺", "🇦🇹", "🇧🇪", "🇧🇷", "🇨🇦", "🇨🇱", "🇨🇳", "🇨🇴", "🇩🇰", "🇫🇮", "🇫🇷", "🇩🇪", "🇭🇰", "🇮🇳", "🇮🇩", "🇮🇪", "🇮🇱", "🇮🇹", "🇯🇵", "🇰🇷", "🇲🇴", "🇲🇾", "🇲🇽", "🇳🇱", "🇳🇿", "🇳🇴", "🇵🇭", "🇵🇱", "🇵🇹", "🇵🇷", "🇷🇺", "🇸🇦", "🇸🇬", "🇿🇦", "🇪🇸", "🇸🇪", "🇨🇭", "🇹🇷", "🇬🇧", "🇺🇸", "🇦🇪", "🇻🇳", "⌚️", "📱", "📲", "💻", "⏰", "⏳", "⌛️", "📷", "📹", "🎥", "📺", "📻", "📟", "📞", "☎️", "📠", "💽", "💾", "💿", "📀", "📼", "🔋", "🔌", "💡", "🔦", "📡", "💳", "💸", "💰", "💎", "🌂", "👝", "👛", "👜", "💼", "🎒", "💄", "👓", "👒", "👡", "👠", "👢", "👞", "👟", "👙", "👗", "👘", "👚", "👕", "👔", "👖", "🚪", "🚿", "🛁", "🚽", "💈", "💉", "💊", "🔬", "🔭", "🔮", "🔧", "🔪", "🔩", "🔨", "💣", "🚬", "🔫", "🔖", "📰", "🔑", "✉️", "📩", "📨", "📧", "📥", "📤", "📦", "📯", "📮", "📪", "📫", "📬", "📭", "📄", "📃", "📑", "📈", "📉", "📊", "📅", "📆", "🔅", "🔆", "📜", "📋", "📖", "📓", "📔", "📒", "📕", "📗", "📘", "📙", "📚", "📇", "🔗", "📎", "📌", "✂️", "📐", "📍", "📏", "🚩", "📁", "📂", "✒️", "✏️", "📝", "🔏", "🔐", "🔒", "🔓", "📣", "📢", "🔈", "🔉", "🔊", "🔇", "💤", "🔔", "🔕", "💭", "💬", "🚸", "🔍", "🔎", "🚫", "⛔️", "📛", "🚷", "🚯", "🚳", "🚱", "📵", "🔞", "🉑", "🉐", "💮", "㊙️", "㊗️", "🈴", "🈵", "🈲", "🈶", "🈚️", "🈸", "🈺", "🈷", "🈹", "🈳", "🈂", "🈁", "🈯️", "💹", "❇️", "✳️", "❎", "✅", "✴️", "📳", "📴", "🆚", "🅰", "🅱", "🆎", "🆑", "🅾", "🆘", "🆔", "🅿️", "🚾", "🆒", "🆓", "🆕", "🆖", "🆗", "🆙", "🏧", "♈️", "♉️", "♊️", "♋️", "♌️", "♍️", "♎️", "♏️", "♐️", "♑️", "♒️", "♓️", "🚻", "🚹", "🚺", "🚼", "♿️", "🚰", "🚭", "🚮", "▶️", "◀️", "🔼", "🔽", "⏩", "⏪", "⏫", "⏬", "➡️", "⬅️", "⬆️", "⬇️", "↗️", "↘️", "↙️", "↖️", "↕️", "↔️", "🔄", "↪️", "↩️", "⤴️", "⤵️", "🔀", "🔁", "🔂", "#⃣", "0⃣", "1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣", "8⃣", "9⃣", "🔟", "🔢", "🔤", "🔡", "🔠", "ℹ️", "📶", "🎦", "🔣", "➕", "➖", "〰", "➗", "✖️", "✔️", "🔃", "™", "©", "®", "💱", "💲", "➰", "➿", "〽️", "❗️", "❓", "❕", "❔", "‼️", "⁉️", "❌", "⭕️", "💯", "🔚", "🔙", "🔛", "🔝", "🔜", "🌀", "Ⓜ️", "⛎", "🔯", "🔰", "🔱", "⚠️", "♨️", "♻️", "💢", "💠", "♠️", "♣️", "♥️", "♦️", "☑️", "⚪️", "⚫️", "🔘", "🔴", "🔵", "🔺", "🔻", "🔸", "🔹", "🔶", "🔷", "▪️", "▫️", "⬛️", "⬜️", "◼️", "◻️", "◾️", "◽️", "🔲", "🔳", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛", "🕜", "🕝", "🕞", "🕟", "🕠", "🕡", "🕢", "🕣", "🕤", "🕥", "🕦", "🕧"]
 
-console.log("sendEnteredMessage "+ messageText);
+  console.log("sendEnteredMessage " + messageText);
 
-    if( previousMessageHash[recipientId] === 'send a message') {
-         sendTextMessage(1073962542672604, messageText); // send a message to Matthew directly
-    }
-    else if( senderContext[recipientId].state === 'addKeywordStep1') {
-         addKeywordStep2(recipientId,messageText);
-    }
-    else if( senderContext[recipientId].state === 'addKeywordText') {
-         addKeywordTextStep2(recipientId,messageText);
-    }
-    else if( senderContext[recipientId].state === 'addKeywordButton') {
-         addKeywordButtonStep2(recipientId,messageText);
-    }
-    else if (emojiString.indexOf(messageText.substring(0,2)) > -1) {
-         var maxLength = emojiString.length;
-         var random = Math.floor(Math.random() * maxLength);
-         messageText = emojiString[random];
-         sendTextMessage(recipientId,messageText);
-    }
-    else { 
-         sendCustomMessage(recipientId,messageText);
-   }
+  if (previousMessageHash[recipientId] === 'send a message') {
+    sendTextMessage(1073962542672604, messageText); // send a message to Matthew directly
+  } else if (senderContext[recipientId].state === 'addKeywordStep1') {
+    addKeywordStep2(recipientId, messageText);
+  } else if (senderContext[recipientId].state === 'addKeywordText') {
+    addKeywordTextStep2(recipientId, messageText);
+  } else if (senderContext[recipientId].state === 'addKeywordButton') {
+    addKeywordButtonStep2(recipientId, messageText);
+  } else if (emojiString.indexOf(messageText.substring(0, 2)) > -1) {
+    var maxLength = emojiString.length;
+    var random = Math.floor(Math.random() * maxLength);
+    messageText = emojiString[random];
+    sendTextMessage(recipientId, messageText);
+  } else {
+    sendCustomMessage(recipientId, messageText);
+  }
 }
 
-function sendCustomMessage(recipientId,messageText) {
+function sendCustomMessage(recipientId, messageText) {
 
-console.log("sendCustoMessage "+ messageText);
+  console.log("sendCustoMessage " + messageText);
 
-    switch (messageText.toLowerCase()) {
+  switch (messageText.toLowerCase()) {
 
-      case 'joke':
-        sendJoke(recipientId);
-        break        
+    case 'joke':
+      sendJoke(recipientId);
+      break
 
-      case 'image':
-        sendRandomImage(recipientId);
-        break        
+    case 'image':
+      sendRandomImage(recipientId);
+      break
 
-      case 'who':
-        sendLocale(recipientId);
-        break        
-      
-      case 'add keyword':
-        addKeywordStep1(recipientId);
-        break        
+    case 'who':
+      sendLocale(recipientId);
+      break
 
-      case 'list keywords':
-        sendKeywordList(recipientId);
-        break        
+    case 'add keyword':
+      addKeywordStep1(recipientId);
+      break
 
-      case 'addkeyword_text':
-        addKeywordText(recipientId);
-        break
+    case 'list keywords':
+      sendKeywordList(recipientId);
+      break
 
-      case 'addkeyword_button':
-        addKeywordButton(recipientId);
-        break
+    case 'addkeyword_text':
+      addKeywordText(recipientId);
+      break
 
-      case 'addkeyword_button1':
-        addKeywordButtonStep3(recipientId,1);
-        break
+    case 'addkeyword_button':
+      addKeywordButton(recipientId);
+      break
 
-      case 'addkeyword_button2':
-        addKeywordButtonStep3(recipientId,2);
-        break
+    case 'addkeyword_button1':
+      addKeywordButtonStep3(recipientId, 1);
+      break
 
-      case 'addkeyword_button3':
-        addKeywordButtonStep3(recipientId,3);
-        break
+    case 'addkeyword_button2':
+      addKeywordButtonStep3(recipientId, 2);
+      break
+
+    case 'addkeyword_button3':
+      addKeywordButtonStep3(recipientId, 3);
+      break
 
 
-      default:
-         sendJsonMessage(recipientId,messageText);
+    default:
+      sendJsonMessage(recipientId, messageText);
 
-    }
-    previousMessageHash[recipientId] = messageText.toLowerCase();
+  }
+  previousMessageHash[recipientId] = messageText.toLowerCase();
 }
 
-function sendJsonMessage(recipientId,keyword) {
-console.log("sendJsonMessage " + keyword);
+function sendJsonMessage(recipientId, keyword) {
+  console.log("sendJsonMessage " + keyword);
   if (_.has(scriptRules, keyword.toUpperCase())) {
-      sendSingleJsonMessage(recipientId,scriptRules[keyword.toUpperCase()]);
-  }
-  else if (_.has(customRules, keyword.toUpperCase())) {
-      sendSingleJsonMessage(recipientId,customRules[keyword.toUpperCase()]);
-  }
-  else  {
-      sendSingleJsonMessage(recipientId,"HOME.json");
+    sendSingleJsonMessage(recipientId, scriptRules[keyword.toUpperCase()]);
+  } else if (_.has(customRules, keyword.toUpperCase())) {
+    sendSingleJsonMessage(recipientId, customRules[keyword.toUpperCase()]);
+  } else {
+    sendSingleJsonMessage(recipientId, "HOME.json");
   }
 }
 
@@ -667,11 +664,10 @@ function sendJoke(recipientId) {
 
   var jokeString = "";
 
-  while( jokeString ===  "")
-  {
-      var random = Math.floor(Math.random() * jokes.length);
-      if(jokes[random].joke.length < 320)   // better be a least one good joke :) 
-          jokeString = jokes[random].joke;
+  while (jokeString === "") {
+    var random = Math.floor(Math.random() * jokes.length);
+    if (jokes[random].joke.length < 320) // better be a least one good joke :) 
+      jokeString = jokes[random].joke;
   }
 
   var messageData = {
@@ -680,16 +676,15 @@ function sendJoke(recipientId) {
     },
     message: {
       text: jokeString,
-      quick_replies: [
-        {
-          "content_type":"text",
-          "title":"Another 😂",
-          "payload":"joke"
+      quick_replies: [{
+          "content_type": "text",
+          "title": "Another 😂",
+          "payload": "joke"
         },
         {
-          "content_type":"text",
-          "title":"Home",
-          "payload":"home"
+          "content_type": "text",
+          "title": "Home",
+          "payload": "home"
         }
       ]
     }
@@ -712,13 +707,11 @@ function sendLocale(recipientId) {
     },
     message: {
       text: nameString,
-      quick_replies: [
-        {
-          "content_type":"text",
-          "title":"Home",
-          "payload":"home"
-        }
-      ]
+      quick_replies: [{
+        "content_type": "text",
+        "title": "Home",
+        "payload": "home"
+      }]
     }
   };
 
@@ -730,7 +723,7 @@ function sendLocale(recipientId) {
  *
  */
 function sendRandomImage(recipientId) {
-    sendImageMessage(recipientId,"https://unsplash.it/400/600/?random");
+  sendImageMessage(recipientId, "https://unsplash.it/400/600/?random");
 }
 
 /*
@@ -748,7 +741,7 @@ function sendButtonMessage(recipientId) {
         payload: {
           template_type: "button",
           text: "This is test text",
-          buttons:[{
+          buttons: [{
             type: "web_url",
             url: "https://www.oculus.com/en-us/rift/",
             title: "Open Web URL"
@@ -764,7 +757,7 @@ function sendButtonMessage(recipientId) {
         }
       }
     }
-  };  
+  };
 
   callSendAPI(messageData);
 }
@@ -778,110 +771,104 @@ function sendGenericMessage(recipientId) {
     recipient: {
       id: recipientId
     },
-    message: 
-    {
+    message: {
       "attachment": {
         "type": "template",
         "payload": {
-         "template_type": "generic",
-          "elements": [
-          {
-            "title": "Bots",
-            "subtitle": "The rise of the Facebook Bot!",
-            "item_url": "http://www.dynamic-memory.com/",               
-            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/robot.png",
-            "buttons": [
-            {
-              "type": "postback",
-              "title": "Make an Appointment",
-              "payload": "appointment"
+          "template_type": "generic",
+          "elements": [{
+              "title": "Bots",
+              "subtitle": "The rise of the Facebook Bot!",
+              "item_url": "http://www.dynamic-memory.com/",
+              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/robot.png",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "Make an Appointment",
+                  "payload": "appointment"
+                },
+                {
+                  "type": "postback",
+                  "title": "Your Business Bot",
+                  "payload": "business"
+                },
+                {
+                  "type": "postback",
+                  "title": "I want a Bot!",
+                  "payload": "I want one"
+                }
+              ]
             },
             {
-              "type": "postback",
-              "title": "Your Business Bot",
-              "payload": "business"
+              "title": "DMS Software",
+              "subtitle": "Software Engineering is awesome",
+              "item_url": "http://www.dynamic-memory.com/",
+              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/evolution.png",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "Contact",
+                  "payload": "Contact"
+                },
+                {
+                  "type": "postback",
+                  "title": "Social media",
+                  "payload": "Social media"
+                },
+                {
+                  "type": "postback",
+                  "title": "Matthew's bio",
+                  "payload": "bio"
+                }
+              ]
             },
             {
-              "type": "postback",
-              "title": "I want a Bot!",
-              "payload": "I want one"
+              "title": "Custom Examples",
+              "subtitle": "A few small apps to give an idea of the possibilites",
+              "item_url": "https://dynamic-memory.com",
+              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/danger-man-at-work-hi.png",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "Tell me a joke 😜",
+                  "payload": "joke"
+                },
+                {
+                  "type": "postback",
+                  "title": "Random Image",
+                  "payload": "image"
+                },
+                {
+                  "type": "postback",
+                  "title": "Who am I?",
+                  "payload": "who"
+                }
+              ]
+            },
+            {
+              "title": "Bot Examples",
+              "subtitle": "Some great bots",
+              "item_url": "https://developers.facebook.com/products/messenger/",
+              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/example.jpeg",
+              "buttons": [{
+                  "type": "web_url",
+                  "url": "https://www.messenger.com/t/HealthTap",
+                  "title": "Health Tap"
+                },
+                {
+                  "type": "web_url",
+                  "url": "http://www.messenger.com/t/EstherBot",
+                  "title": "Esther's cool bot"
+                },
+                {
+                  "type": "web_url",
+                  "url": "http://www.messenger.com/t/techcrunch",
+                  "title": "TechCrunch news bot"
+                }
+              ]
             }
-            ]
-          }, 
-          {
-            "title": "DMS Software",
-            "subtitle": "Software Engineering is awesome",
-            "item_url": "http://www.dynamic-memory.com/",               
-            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/evolution.png",
-            "buttons": [
-            {
-              "type": "postback",
-              "title": "Contact",
-              "payload": "Contact"
-            }, 
-            {
-              "type": "postback",
-              "title": "Social media",
-              "payload": "Social media"
-            },
-            {
-              "type": "postback",
-              "title": "Matthew's bio",
-              "payload": "bio"
-            }
-            ]
-          }, 
-          { 
-            "title": "Custom Examples",
-            "subtitle": "A few small apps to give an idea of the possibilites",
-            "item_url": "https://dynamic-memory.com",
-            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/danger-man-at-work-hi.png",
-            "buttons": [
-            {
-              "type": "postback",
-              "title": "Tell me a joke 😜",
-              "payload": "joke"
-            },
-            {
-              "type": "postback",
-              "title": "Random Image",
-              "payload": "image"
-            },
-            {
-              "type": "postback",
-              "title": "Who am I?",
-              "payload": "who"
-            }
-            ]
-          },
-          { 
-            "title": "Bot Examples",
-            "subtitle": "Some great bots",
-            "item_url": "https://developers.facebook.com/products/messenger/",
-            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/example.jpeg",
-            "buttons": [
-            {
-              "type": "web_url",
-              "url": "https://www.messenger.com/t/HealthTap",
-              "title": "Health Tap"
-            },
-            {
-              "type": "web_url",
-              "url": "http://www.messenger.com/t/EstherBot",
-              "title": "Esther's cool bot"
-            },
-            {
-              "type": "web_url",
-              "url": "http://www.messenger.com/t/techcrunch",
-              "title": "TechCrunch news bot"
-            }
-            ]
-          }
           ]
         }
       }
     }
-  };  
+  };
 
   callSendAPI(messageData);
 }
@@ -892,13 +879,13 @@ function sendGenericMessage(recipientId) {
  */
 function sendReceiptMessage(recipientId) {
   // Generate a random receipt ID as the API requires a unique ID
-  var receiptId = "order" + Math.floor(Math.random()*1000);
+  var receiptId = "order" + Math.floor(Math.random() * 1000);
 
   var messageData = {
     recipient: {
       id: recipientId
     },
-    message:{
+    message: {
       attachment: {
         type: "template",
         payload: {
@@ -906,8 +893,8 @@ function sendReceiptMessage(recipientId) {
           recipient_name: "Peter Chang",
           order_number: receiptId,
           currency: "USD",
-          payment_method: "Visa 1234",        
-          timestamp: "1428444852", 
+          payment_method: "Visa 1234",
+          timestamp: "1428444852",
           elements: [{
             title: "Oculus Rift",
             subtitle: "Includes: headset, sensor, remote",
@@ -964,21 +951,20 @@ function sendQuickReply(recipientId) {
     message: {
       text: "Some regular buttons and a location test",
       metadata: "DEVELOPER_DEFINED_METADATA",
-      quick_replies: [
-        {
-          "content_type":"text",
-          "title":"Action",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
+      quick_replies: [{
+          "content_type": "text",
+          "title": "Action",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
         },
         {
-          "content_type":"text",
-          "title":"Something else",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_SOMETHING"
+          "content_type": "text",
+          "title": "Something else",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_SOMETHING"
         },
         {
-          "content_type":"location",
-          "title":"Send Location",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_LOCATION"
+          "content_type": "location",
+          "title": "Send Location",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_LOCATION"
         }
       ]
     }
@@ -1047,7 +1033,9 @@ function sendTypingOff(recipientId) {
 function callSendAPI(messageData) {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
     method: 'POST',
     json: messageData
 
@@ -1057,16 +1045,16 @@ function callSendAPI(messageData) {
       var messageId = body.message_id;
 
       if (messageId) {
-        console.log("Successfully sent message with id %s to recipient %s", 
+        console.log("Successfully sent message with id %s to recipient %s",
           messageId, recipientId);
       } else {
-      console.log("Successfully called Send API for recipient %s", 
-        recipientId);
+        console.log("Successfully called Send API for recipient %s",
+          recipientId);
       }
     } else {
       console.error("Unable to send message. :" + response.error);
     }
-  });  
+  });
 }
 
 /*
@@ -1075,310 +1063,311 @@ function callSendAPI(messageData) {
  *
  */
 function callGetLocaleAPI(event, handleReceived) {
-    var userID = event.sender.id;
-    var http = require('https');
-    var path = '/v2.6/' + userID +'?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=' + PAGE_ACCESS_TOKEN;
-    var options = {
-      host: 'graph.facebook.com',
-      path: path
-    };
-    
-    if(senderContext[userID])
-    {
-       firstName = senderContext[userID].firstName; 
-       lastName = senderContext[userID].lastName; 
-       console.log("found " + JSON.stringify(senderContext[userID]));
-       if(!firstName) 
-          firstName = "undefined";
-       if(!lastName) 
-          lastName = "undefined";
-       handleReceived(event);
-       return;
-    }
+  var userID = event.sender.id;
+  var http = require('https');
+  var path = '/v2.6/' + userID + '?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=' + PAGE_ACCESS_TOKEN;
+  var options = {
+    host: 'graph.facebook.com',
+    path: path
+  };
 
-    var req = http.get(options, function(res) {
-      //console.log('STATUS: ' + res.statusCode);
-      //console.log('HEADERS: ' + JSON.stringify(res.headers));
+  if (senderContext[userID]) {
+    firstName = senderContext[userID].firstName;
+    lastName = senderContext[userID].lastName;
+    console.log("found " + JSON.stringify(senderContext[userID]));
+    if (!firstName)
+      firstName = "undefined";
+    if (!lastName)
+      lastName = "undefined";
+    handleReceived(event);
+    return;
+  }
 
-      // Buffer the body entirely for processing as a whole.
-      var bodyChunks = [];
-      res.on('data', function(chunk) {
-        // You can process streamed parts here...
-        bodyChunks.push(chunk);
-      }).on('end', function() {
-        var body = Buffer.concat(bodyChunks);
-        var bodyObject = JSON.parse(body);
-        firstName = bodyObject.first_name;
-        lastName = bodyObject.last_name;
-        if(!firstName) 
-          firstName = "undefined";
-        if(!lastName) 
-          lastName = "undefined";
-        senderContext[userID] = {};
-        senderContext[userID].firstName = firstName;
-        senderContext[userID].lastName = lastName;
-        console.log("defined " + JSON.stringify(senderContext));
-        handleReceived(event);
-      })
-    });
-    req.on('error', function(e) {
-      console.log('ERROR: ' + e.message);
-    });
+  var req = http.get(options, function (res) {
+    //console.log('STATUS: ' + res.statusCode);
+    //console.log('HEADERS: ' + JSON.stringify(res.headers));
+
+    // Buffer the body entirely for processing as a whole.
+    var bodyChunks = [];
+    res.on('data', function (chunk) {
+      // You can process streamed parts here...
+      bodyChunks.push(chunk);
+    }).on('end', function () {
+      var body = Buffer.concat(bodyChunks);
+      var bodyObject = JSON.parse(body);
+      firstName = bodyObject.first_name;
+      lastName = bodyObject.last_name;
+      if (!firstName)
+        firstName = "undefined";
+      if (!lastName)
+        lastName = "undefined";
+      senderContext[userID] = {};
+      senderContext[userID].firstName = firstName;
+      senderContext[userID].lastName = lastName;
+      console.log("defined " + JSON.stringify(senderContext));
+      handleReceived(event);
+    })
+  });
+  req.on('error', function (e) {
+    console.log('ERROR: ' + e.message);
+  });
 }
 
+function SendMessageToSpecificUser(recipientID) {
+  request({
+        url: 'https://graph.facebook.com/v2.6/me/broadcast_messages',
+        qs: {
+          access_token: PAGE_ACCESS_TOKEN
+        },
+        method: 'POST',
+        json: {
+          "messaging_type": "RESPONSE",
+          "recipient": {
+            "id": recipientID;
+          },
+          "message": {
+            "text": "hello, world!"
+          }
+        }
+      }
+    },
+    function (error, response, body) {
+      console.log("Send specific message " + response)
+      if (error) {
+        console.log('Error sending specific messages: ', error)
+      } else if (response.body.error) {
+        console.log('Error: ', response.body.error)
+      }
+    })
+}
 
-function addPersistentMenu(){
- request({
+function addPersistentMenu() {
+  request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
     method: 'POST',
-    json:{
-  "get_started":{
-    "payload":"GET_STARTED_PAYLOAD"
-   }
- }
-}, function(error, response, body) {
+    json: {
+      "get_started": {
+        "payload": "GET_STARTED_PAYLOAD"
+      }
+    }
+  }, function (error, response, body) {
     console.log("Add persistent menu " + response)
     if (error) {
-        console.log('Error sending messages: ', error)
-    } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
-    }
-})
- request({
-  url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-  qs: { access_token: PAGE_ACCESS_TOKEN },
-  method: 'POST',
-  json:{
-    "greeting": [{
-			"locale": "default",
-			"text": "Greeting text for default local !"
-		}, {
-			"locale": "en_US",
-			"text": "Hello There! Let's get started."
-		}]
-}
-}, function(error, response, body) {
-  console.log("Add persistent menu " + response)
-  if (error) {
       console.log('Error sending messages: ', error)
-  } else if (response.body.error) {
+    } else if (response.body.error) {
       console.log('Error: ', response.body.error)
-  }
-})
- request({
+    }
+  })
+  request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
     method: 'POST',
-    json:{
-"persistent_menu":[
-    {
-      "locale":"default",
-      "composer_input_disabled": false,
-      "call_to_actions":[
-        {
-          "title":"Home",
-          "type":"postback",
-          "payload":"HOME"
-        },
-        {
-          "title":"Nested Menu Example",
-          "type":"nested",
-          "call_to_actions":[
-            {
-              "title":"Who am I",
-              "type":"postback",
-              "payload":"WHO"
+    json: {
+      "greeting": [{
+        "locale": "default",
+        "text": "Greeting text for default local !"
+      }, {
+        "locale": "en_US",
+        "text": "Hello There! Let's get started."
+      }]
+    }
+  }, function (error, response, body) {
+    console.log("Add persistent menu " + response)
+    if (error) {
+      console.log('Error sending messages: ', error)
+    } else if (response.body.error) {
+      console.log('Error: ', response.body.error)
+    }
+  })
+  request({
+    url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
+    method: 'POST',
+    json: {
+      "persistent_menu": [{
+          "locale": "default",
+          "composer_input_disabled": false,
+          "call_to_actions": [{
+              "title": "Home",
+              "type": "postback",
+              "payload": "HOME"
             },
             {
-              "title":"Joke",
-              "type":"postback",
-              "payload":"joke"
+              "title": "Nested Menu Example",
+              "type": "nested",
+              "call_to_actions": [{
+                  "title": "Who am I",
+                  "type": "postback",
+                  "payload": "WHO"
+                },
+                {
+                  "title": "Joke",
+                  "type": "postback",
+                  "payload": "joke"
+                },
+                {
+                  "title": "Contact Info",
+                  "type": "postback",
+                  "payload": "CONTACT"
+                }
+              ]
             },
             {
-              "title":"Contact Info",
-              "type":"postback",
-              "payload":"CONTACT"
+              "type": "web_url",
+              "title": "Latest News",
+              "url": "http://foxnews.com",
+              "webview_height_ratio": "full"
             }
           ]
         },
         {
-          "type":"web_url",
-          "title":"Latest News",
-          "url":"http://foxnews.com",
-          "webview_height_ratio":"full"
+          "locale": "zh_CN",
+          "composer_input_disabled": false
         }
       ]
-    },
-    {
-      "locale":"zh_CN",
-      "composer_input_disabled":false
-    }
-    ]
     }
 
-}, function(error, response, body) {
+  }, function (error, response, body) {
     console.log(response)
     if (error) {
-        console.log('Error sending messages: ', error)
+      console.log('Error sending messages: ', error)
     } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
+      console.log('Error: ', response.body.error)
     }
-})
+  })
 
 }
 
-function removePersistentMenu(){
- request({
+function removePersistentMenu() {
+  request({
     url: 'https://graph.facebook.com/v2.6/me/thread_settings',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
     method: 'POST',
-    json:{
-        setting_type : "call_to_actions",
-        thread_state : "existing_thread",
-        call_to_actions:[ ]
+    json: {
+      setting_type: "call_to_actions",
+      thread_state: "existing_thread",
+      call_to_actions: []
     }
 
-}, function(error, response, body) {
+  }, function (error, response, body) {
     console.log(response)
     if (error) {
-        console.log('Error sending messages: ', error)
+      console.log('Error sending messages: ', error)
     } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
+      console.log('Error: ', response.body.error)
     }
-})
+  })
 }
 
-function addKeywordStep1(recipientId)
-{
-   sendTextMessage(recipientId,"The keyword will drive the actions by the Bot.  The user can type in the keyword or it can be triggered by a link.  The keyword can contain letters, numbers and spaces. Please type in the keyword:");
-   senderContext[recipientId].state = "addKeywordStep1";
+function addKeywordStep1(recipientId) {
+  sendTextMessage(recipientId, "The keyword will drive the actions by the Bot.  The user can type in the keyword or it can be triggered by a link.  The keyword can contain letters, numbers and spaces. Please type in the keyword:");
+  senderContext[recipientId].state = "addKeywordStep1";
 }
 
-function addKeywordStep2(recipientId, messageText)
-{
-   senderContext[recipientId].keyword = messageText;
-   senderContext[recipientId].state = "addKeywordStep2";
-   sendJsonMessage(recipientId,"addKeywordStep2");
+function addKeywordStep2(recipientId, messageText) {
+  senderContext[recipientId].keyword = messageText;
+  senderContext[recipientId].state = "addKeywordStep2";
+  sendJsonMessage(recipientId, "addKeywordStep2");
 }
 
-function stateMachineError(recipientId)
-{
-   sendTextMessage(recipientId,"Sorry the Bot is confused.  We will have to start again.");
-   senderContext[recipientId].state = "";
-   senderContext[recipientId].keyword = "";
+function stateMachineError(recipientId) {
+  sendTextMessage(recipientId, "Sorry the Bot is confused.  We will have to start again.");
+  senderContext[recipientId].state = "";
+  senderContext[recipientId].keyword = "";
 }
 
-function addKeywordText(recipientId)
-{
-   console.log("addKeywordText " + JSON.stringify(senderContext));
+function addKeywordText(recipientId) {
+  console.log("addKeywordText " + JSON.stringify(senderContext));
 
-   if( senderContext[recipientId].state === "addKeywordStep2")
-   {
-       sendTextMessage(recipientId,"Please type in the text to be sent to the user when this keyword is used.");
-       senderContext[recipientId].state = "addKeywordText";
-   }
-   else
-   {
-       stateMachineError(recipientId);
-   }
+  if (senderContext[recipientId].state === "addKeywordStep2") {
+    sendTextMessage(recipientId, "Please type in the text to be sent to the user when this keyword is used.");
+    senderContext[recipientId].state = "addKeywordText";
+  } else {
+    stateMachineError(recipientId);
+  }
 }
 
-function addKeywordTextStep2(recipientId,messageText)
-{
-   if( senderContext[recipientId].state === "addKeywordText")
-   {
-      var filename = senderContext[recipientId].keyword.toUpperCase()+ ".json";
-      var contents = '{"text": "' + messageText + '" }';
-      console.log("contents: "+contents);
-      fs.writeFile("script/"+filename, contents, function(err) {
-           if(err) {
-               return console.log(err);
-           }
-           console.log("The file was saved!");
-           senderContext[recipientId].state = "";
-           customRules[senderContext[recipientId].keyword.toUpperCase()] = senderContext[recipientId].keyword.toUpperCase();
-           sendTextMessage(recipientId,"The keyword has been added.  Please type in the keyword to see the response.");
-
-/*
-fs.readFile(filename, function read(err, data) {
-    if (err) {
-        throw err;
-    }
-
-    // Invoke the next step here however you like
-    console.log("file contains: " + data);  
-});
-*/
-        }
-     ); 
-   }
-   else
-   {
-       stateMachineError(recipientId);
-   }
-}
-
-function addKeywordButton(recipientId)
-{
-   console.log("addKeywordButton " + JSON.stringify(senderContext));
-
-   if( senderContext[recipientId].state === "addKeywordStep2")
-   {
-       sendTextMessage(recipientId,"Please type in the title for the button.");
-       senderContext[recipientId].state = "addKeywordButton";
-   }
-   else
-   {
-       stateMachineError(recipientId);
-   }
-}
-
-function addKeywordButtonStep2(recipientId, messageText)
-{
-   if( senderContext[recipientId].state === "addKeywordButton")
-   {
-       senderContext[recipientId].state = "addKeywordButtonStep2";
-       sendSingleJsonMessage(recipientId,"ADDKEYWORD_BUTTONSTEP2.json");
-   }
-   else
-   {
-       stateMachineError(recipientId);
-   }
-}
-
-function addKeywordButtonStep3(recipientId, buttonCount)
-{
-   if( senderContext[recipientId].state === "addKeywordButtonStep2")
-   {
-       senderContext[recipientId].state = "addKeywordButtonStep3";
-       senderContext[recipientId].buttonCount = buttonCount;
-       sendSingleJsonMessage(recipientId,"ADDKEYWORD_BUTTONSTEP3.json");
-   }
-   else
-   {
-       stateMachineError(recipientId);
-   }
-}
-
-function sendKeywordList(recipientId)
-{
-//  if (customRules.length > 0) 
-  if (1)
-  {
-      var keys = Object.keys(customRules);
-
-      for (var p in keys) 
-      {
-         if (keys.hasOwnProperty(p))
-         {
-            sendTextMessage(recipientId,keys[p]);
-         }
+function addKeywordTextStep2(recipientId, messageText) {
+  if (senderContext[recipientId].state === "addKeywordText") {
+    var filename = senderContext[recipientId].keyword.toUpperCase() + ".json";
+    var contents = '{"text": "' + messageText + '" }';
+    console.log("contents: " + contents);
+    fs.writeFile("script/" + filename, contents, function (err) {
+      if (err) {
+        return console.log(err);
       }
-  } 
-  else
-  {
-    sendTextMessage(recipientId,"No custom keywords defined yet");
+      console.log("The file was saved!");
+      senderContext[recipientId].state = "";
+      customRules[senderContext[recipientId].keyword.toUpperCase()] = senderContext[recipientId].keyword.toUpperCase();
+      sendTextMessage(recipientId, "The keyword has been added.  Please type in the keyword to see the response.");
+
+      /*
+      fs.readFile(filename, function read(err, data) {
+          if (err) {
+              throw err;
+          }
+
+          // Invoke the next step here however you like
+          console.log("file contains: " + data);  
+      });
+      */
+    });
+  } else {
+    stateMachineError(recipientId);
+  }
+}
+
+function addKeywordButton(recipientId) {
+  console.log("addKeywordButton " + JSON.stringify(senderContext));
+
+  if (senderContext[recipientId].state === "addKeywordStep2") {
+    sendTextMessage(recipientId, "Please type in the title for the button.");
+    senderContext[recipientId].state = "addKeywordButton";
+  } else {
+    stateMachineError(recipientId);
+  }
+}
+
+function addKeywordButtonStep2(recipientId, messageText) {
+  if (senderContext[recipientId].state === "addKeywordButton") {
+    senderContext[recipientId].state = "addKeywordButtonStep2";
+    sendSingleJsonMessage(recipientId, "ADDKEYWORD_BUTTONSTEP2.json");
+  } else {
+    stateMachineError(recipientId);
+  }
+}
+
+function addKeywordButtonStep3(recipientId, buttonCount) {
+  if (senderContext[recipientId].state === "addKeywordButtonStep2") {
+    senderContext[recipientId].state = "addKeywordButtonStep3";
+    senderContext[recipientId].buttonCount = buttonCount;
+    sendSingleJsonMessage(recipientId, "ADDKEYWORD_BUTTONSTEP3.json");
+  } else {
+    stateMachineError(recipientId);
+  }
+}
+
+function sendKeywordList(recipientId) {
+  //  if (customRules.length > 0) 
+  if (1) {
+    var keys = Object.keys(customRules);
+
+    for (var p in keys) {
+      if (keys.hasOwnProperty(p)) {
+        sendTextMessage(recipientId, keys[p]);
+      }
+    }
+  } else {
+    sendTextMessage(recipientId, "No custom keywords defined yet");
   }
   return;
 }
@@ -1387,9 +1376,8 @@ function sendKeywordList(recipientId)
 // Start server
 // Webhooks must be available via SSL with a certificate signed by a valid 
 // certificate authority.
-app.listen(app.get('port'), function() {
+app.listen(app.get('port'), function () {
   console.log('Node app is running on port', app.get('port'));
 });
 
 module.exports = app;
-
