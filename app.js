@@ -305,6 +305,10 @@ function handleReceivedMessage(event) {
           sendTextMessage(senderID, firstName);
         break
 
+      case 'select date and time':
+        sendDateSelection(senderID);
+        break
+
         /* case 'add menu':
           addPersistentMenu();
           break
@@ -559,9 +563,9 @@ function sendEnteredMessage(recipientId, messageText) {
 
   if (previousMessageHash[recipientId] === 'send a message') {
     sendTextMessage(1073962542672604, messageText); // send a message to Matthew directly
-  } else if (previousMessageHash[recipientId] === 'Select Date and Time') {
-    sendAppointmentMessage(2464058527010934, messageText);
-    sendDateReply(recipientId);
+    /*   } else if (previousMessageHash[recipientId] === 'Select Date and Time') {
+        sendAppointmentMessage(2464058527010934, messageText);
+        sendDateReply(recipientId); */
   } else if (senderContext[recipientId].state === 'addKeywordText') {
     addKeywordTextStep2(recipientId, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordButton') {
@@ -662,7 +666,7 @@ function sendTextMessage(recipientId, messageText) {
 function sendAppointmentMessage(recipientId, messageText) {
   var messageData = {
     "recipient": {
-      "id": recipientId
+      "id": 2464058527010934
     },
     "message": {
       "text": firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment on " + messageText,
@@ -878,6 +882,137 @@ function sendGenericMessage(recipientId) {
                   "type": "web_url",
                   "url": "http://www.messenger.com/t/techcrunch",
                   "title": "TechCrunch news bot"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
+var today = new Date();
+var tomorrow = new Date();
+var third = new Date();
+var fourth = new Date();
+var fifth = new Date();
+var sixth = new Date();
+tomorrow.setDate(today.getDate() + 1);
+third.setDate(tomorrow.getDate() + 1);
+fourth.setDate(third.getDate() + 1);
+fifth.setDate(fourth.getDate() + 1);
+sixth.setDate(fifth.getDate() + 1);
+
+function sendDateSelection(recipientId) {
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "generic",
+          "elements": [{
+              "title": tomorrow,
+              "subtitle": "Select your desired timeslot",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "10:00",
+                  "payload": "appointment"
+                },
+                {
+                  "type": "postback",
+                  "title": "13:00",
+                  "payload": "business"
+                },
+                {
+                  "type": "postback",
+                  "title": "16:00",
+                  "payload": "I want one"
+                }
+              ]
+            },
+            {
+              "title": third,
+              "subtitle": "Select your desired timeslot",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "10:00",
+                  "payload": "appointment"
+                },
+                {
+                  "type": "postback",
+                  "title": "13:00",
+                  "payload": "business"
+                },
+                {
+                  "type": "postback",
+                  "title": "16:00",
+                  "payload": "I want one"
+                }
+              ]
+            },
+            {
+              "title": fourth,
+              "subtitle": "Select your desired timeslot",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "10:00",
+                  "payload": "appointment"
+                },
+                {
+                  "type": "postback",
+                  "title": "13:00",
+                  "payload": "business"
+                },
+                {
+                  "type": "postback",
+                  "title": "16:00",
+                  "payload": "I want one"
+                }
+              ]
+            },
+            {
+              "title": fifth,
+              "subtitle": "Select your desired timeslot",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "10:00",
+                  "payload": "appointment"
+                },
+                {
+                  "type": "postback",
+                  "title": "13:00",
+                  "payload": "business"
+                },
+                {
+                  "type": "postback",
+                  "title": "16:00",
+                  "payload": "I want one"
+                }
+              ]
+            },
+            {
+              "title": sixth,
+              "subtitle": "Select your desired timeslot",
+              "buttons": [{
+                  "type": "postback",
+                  "title": "10:00",
+                  "payload": "appointment"
+                },
+                {
+                  "type": "postback",
+                  "title": "13:00",
+                  "payload": "business"
+                },
+                {
+                  "type": "postback",
+                  "title": "16:00",
+                  "payload": "I want one"
                 }
               ]
             }
