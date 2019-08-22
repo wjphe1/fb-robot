@@ -305,10 +305,6 @@ function handleReceivedMessage(event) {
           sendTextMessage(senderID, firstName);
         break
 
-      case 'select date and time':
-        sendDateSelection(senderID);
-        break
-
         /* case 'add menu':
           addPersistentMenu();
           break
@@ -598,8 +594,8 @@ function sendCustomMessage(recipientId, messageText) {
       sendLocale(recipientId);
       break
 
-    case 'add keyword':
-      addKeywordStep1(recipientId);
+    case 'select date and time':
+      sendDateSelection(recipientId);
       break
 
     case 'list keywords':
