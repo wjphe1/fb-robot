@@ -3,8 +3,8 @@
       "quick_replies": [
         {
           "content_type":"text",
-          "title":"Select Date",
-          "payload":"selectdate"
+          "title":"Select Date and Time",
+          "payload":"selectdateandtime"
         },
         {
           "content_type":"text",
