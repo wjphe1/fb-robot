@@ -36,22 +36,50 @@ var third = new Date();
 var fourth = new Date();
 var fifth = new Date();
 var sixth = new Date();
-var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-if (today.getDay() == 6 ) {
-tomorrow.setDate(today.getDate() + 2);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 0 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 1 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 3);
-} else if (today.getDay() == 2 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 3);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 3 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 3);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 4 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 3);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 5 )  {
-  tomorrow.setDate(today.getDate() + 3);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+if (today.getDay() == 6) {
+  tomorrow.setDate(today.getDate() + 2);
+  third.setDate(tomorrow.getDate() + 1);
+  fourth.setDate(third.getDate() + 1);
+  fifth.setDate(fourth.getDate() + 1);
+  sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 0) {
+  tomorrow.setDate(today.getDate() + 1);
+  third.setDate(tomorrow.getDate() + 1);
+  fourth.setDate(third.getDate() + 1);
+  fifth.setDate(fourth.getDate() + 1);
+  sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 1) {
+  tomorrow.setDate(today.getDate() + 1);
+  third.setDate(tomorrow.getDate() + 1);
+  fourth.setDate(third.getDate() + 1);
+  fifth.setDate(fourth.getDate() + 1);
+  sixth.setDate(fifth.getDate() + 3);
+} else if (today.getDay() == 2) {
+  tomorrow.setDate(today.getDate() + 1);
+  third.setDate(tomorrow.getDate() + 1);
+  fourth.setDate(third.getDate() + 1);
+  fifth.setDate(fourth.getDate() + 3);
+  sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 3) {
+  tomorrow.setDate(today.getDate() + 1);
+  third.setDate(tomorrow.getDate() + 1);
+  fourth.setDate(third.getDate() + 3);
+  fifth.setDate(fourth.getDate() + 1);
+  sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 4) {
+  tomorrow.setDate(today.getDate() + 1);
+  third.setDate(tomorrow.getDate() + 3);
+  fourth.setDate(third.getDate() + 1);
+  fifth.setDate(fourth.getDate() + 1);
+  sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 5) {
+  tomorrow.setDate(today.getDate() + 3);
+  third.setDate(tomorrow.getDate() + 1);
+  fourth.setDate(third.getDate() + 1);
+  fifth.setDate(fourth.getDate() + 1);
+  sixth.setDate(fifth.getDate() + 1);
 }
 
 var app = express();
@@ -1140,7 +1168,7 @@ function sendDateReply(recipientId) {
       id: recipientId
     },
     message: {
-      text: firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],",
+      text: firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + days[tomorrow.getDay()],
       metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
