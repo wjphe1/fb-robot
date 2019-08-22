@@ -598,8 +598,8 @@ function sendCustomMessage(recipientId, messageText) {
       sendDateSelection(recipientId);
       break
 
-    case 'list keywords':
-      sendKeywordList(recipientId);
+    case 'appreply':
+      sendDateReply(recipientId);
       break
 
     case 'addkeyword_text':
@@ -896,11 +896,24 @@ var third = new Date();
 var fourth = new Date();
 var fifth = new Date();
 var sixth = new Date();
-tomorrow.setDate(today.getDate() + 1);
-third.setDate(tomorrow.getDate() + 1);
-fourth.setDate(third.getDate() + 1);
-fifth.setDate(fourth.getDate() + 1);
-sixth.setDate(fifth.getDate() + 1);
+var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+if (today.getDay() == 6 ) {
+tomorrow.setDate(today.getDate() + 2);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 0 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 1 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 3);
+} else if (today.getDay() == 2 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 3);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 3 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 3);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 4 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 3);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 5 )  {
+  tomorrow.setDate(today.getDate() + 3);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+}
+
 
 function sendDateSelection(recipientId) {
   var messageData = {
@@ -913,87 +926,87 @@ function sendDateSelection(recipientId) {
         "payload": {
           "template_type": "generic",
           "elements": [{
-              "title": tomorrow,
-              "subtitle": "Select your desired timeslot",
+              "title": tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
+              "subtitle": "Select timeslot",
               "buttons": [{
                   "type": "postback",
                   "title": "10:00",
-                  "payload": "appointment"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "13:00",
-                  "payload": "business"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "16:00",
-                  "payload": "I want one"
+                  "payload": "appreply"
                 }
               ]
             },
             {
-              "title": third,
+              "title": third.getDate() + "/" + third.getMonth() + "/" + third.getFullYear() + "\n" + days[third.getDay()],
               "subtitle": "Select your desired timeslot",
               "buttons": [{
                   "type": "postback",
                   "title": "10:00",
-                  "payload": "appointment"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "13:00",
-                  "payload": "business"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "16:00",
-                  "payload": "I want one"
+                  "payload": "appreply"
                 }
               ]
             },
             {
-              "title": fourth,
+              "title": fourth.getDate() + "/" + fourth.getMonth() + "/" + fourth.getFullYear() + "\n" + days[fourth.getDay()],
               "subtitle": "Select your desired timeslot",
               "buttons": [{
                   "type": "postback",
                   "title": "10:00",
-                  "payload": "appointment"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "13:00",
-                  "payload": "business"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "16:00",
-                  "payload": "I want one"
+                  "payload": "appreply"
                 }
               ]
             },
             {
-              "title": fifth,
+              "title": fifth.getDate() + "/" + fifth.getMonth() + "/" + fifth.getFullYear() + "\n" + days[fifth.getDay()],
               "subtitle": "Select your desired timeslot",
               "buttons": [{
                   "type": "postback",
                   "title": "10:00",
-                  "payload": "appointment"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "13:00",
-                  "payload": "business"
+                  "payload": "appreply"
                 },
                 {
                   "type": "postback",
                   "title": "16:00",
-                  "payload": "I want one"
+                  "payload": "appreply"
                 }
               ]
             },
             {
-              "title": sixth,
+              "title": sixth.getDate() + "/" + sixth.getMonth() + "/" + sixth.getFullYear() + "\n" + days[sixth.getDay()],
               "subtitle": "Select your desired timeslot",
               "buttons": [{
                   "type": "postback",
