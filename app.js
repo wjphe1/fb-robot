@@ -652,7 +652,7 @@ function sendCustomMessage(recipientId, messageText) {
 
     case '10am':
       var actualDate = "\n" + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + " : " + days[tomorrow.getDay()]
-      sendDateReply(messageText, recipientId, firstName, lastName, actualDate);
+      sendDateReply(messageText, recipientId, firstName, actualDate);
       sendAppointmentMessage(messageText, recipientId, firstName, lastName, actualDate);
       break
 
