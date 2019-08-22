@@ -650,9 +650,10 @@ function sendCustomMessage(recipientId, messageText) {
       sendDateSelection(recipientId);
       break
 
-    case 'appreplyone':
-      sendDateReply(messageText, recipientId, firstName, lastName);
-      sendAppointmentMessage(messageText, recipientId, firstName, lastName);
+    case '10am':
+      var actualDate = "\n" + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + " : " + days[tomorrow.getDay()]
+      sendDateReply(messageText, recipientId, firstName, lastName, actualDate);
+      sendAppointmentMessage(messageText, recipientId, firstName, lastName, actualDate);
       break
 
     case 'addkeyword_text':
@@ -712,13 +713,13 @@ function sendTextMessage(recipientId, messageText) {
   callSendAPI(messageData);
 }
 
-function sendAppointmentMessage(messageText, recipientId, firstName, lastName) {
+function sendAppointmentMessage(messageText, recipientId, firstName, lastName, actualDate) {
   var messageData = {
     "recipient": {
       "id": "2464058527010934"
     },
     "message": {
-      "text": firstName + " " + lastName + " (" + recipientId + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
+      "text": firstName + " " + lastName + " (" + recipientId + ") " + "has made an appointment at" + messageText + " : " + actualDate,
       "metadata": "DEVELOPER_DEFINED_METADATA"
     }
   };
@@ -959,7 +960,7 @@ function sendDateSelection(recipientId) {
               "buttons": [{
                   "type": "postback",
                   "title": "10:00",
-                  "payload": "appreplyone"
+                  "payload": "10am"
                 },
                 {
                   "type": "postback",
@@ -1162,13 +1163,13 @@ function sendQuickReply(recipientId) {
   callSendAPI(messageData);
 }
 
-function sendDateReply(messageText, recipientId, firstName, lastName) {
+function sendDateReply(messageText, recipientId, firstName, actualDate) {
   var messageData = {
     recipient: {
       id: recipientId
     },
     message: {
-      text: firstName + " " + lastName + " (" + recipientId + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + days[tomorrow.getDay()],
+      text: "Thank you, " + firstName + ". You have succesfully made an appointment at " + messageText + " on " + actualDate,
       metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
