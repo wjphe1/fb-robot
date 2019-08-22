@@ -651,8 +651,8 @@ function sendCustomMessage(recipientId, messageText) {
       break
 
     case 'appreplyone':
-      sendDateReply(recipientId);
-      sendAppointmentMessage(messageText);
+      sendDateReply(messageText, recipientId, firstName, lastName);
+      sendAppointmentMessage(messageText, recipientId, firstName, lastName);
       break
 
     case 'addkeyword_text':
@@ -712,13 +712,13 @@ function sendTextMessage(recipientId, messageText) {
   callSendAPI(messageData);
 }
 
-function sendAppointmentMessage(messageText) {
+function sendAppointmentMessage(messageText, recipientId, firstName, lastName) {
   var messageData = {
     "recipient": {
       "id": "2464058527010934"
     },
     "message": {
-      "text": firstName + " " + lastName + " (" + recipientID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
+      "text": firstName + " " + lastName + " (" + recipientId + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
       "metadata": "DEVELOPER_DEFINED_METADATA"
     }
   };
@@ -1162,13 +1162,13 @@ function sendQuickReply(recipientId) {
   callSendAPI(messageData);
 }
 
-function sendDateReply(recipientId) {
+function sendDateReply(messageText, recipientId, firstName, lastName) {
   var messageData = {
     recipient: {
       id: recipientId
     },
     message: {
-      text: firstName + " " + lastName + " (" + recipientID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + days[tomorrow.getDay()],
+      text: firstName + " " + lastName + " (" + recipientId + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + days[tomorrow.getDay()],
       metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
