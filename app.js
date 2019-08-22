@@ -559,8 +559,9 @@ function sendEnteredMessage(recipientId, messageText) {
 
   if (previousMessageHash[recipientId] === 'send a message') {
     sendTextMessage(1073962542672604, messageText); // send a message to Matthew directly
-  } else if (senderContext[recipientId].state === 'Select Date and Time') {
+  } else if (previousMessageHash[recipientId] === 'Select Date and Time') {
     sendAppointmentMessage(2464058527010934, messageText);
+    sendDateReply(recipientId);
   } else if (senderContext[recipientId].state === 'addKeywordText') {
     addKeywordTextStep2(recipientId, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordButton') {
@@ -983,6 +984,20 @@ function sendQuickReply(recipientId) {
           "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_LOCATION"
         }
       ]
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
+function sendDateReply(recipientId) {
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      text: "Your appointment request has been send to the authorities. Thank you for your support!",
+      metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
 
