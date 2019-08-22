@@ -120,7 +120,6 @@ app.post('/webhook', function (req, res) {
 });
 
 app.get('/setup', function (req, res) {
-
   setupGetStartedButton();
   AddPersistentMenu();
 });
@@ -560,8 +559,8 @@ function sendEnteredMessage(recipientId, messageText) {
 
   if (previousMessageHash[recipientId] === 'send a message') {
     sendTextMessage(1073962542672604, messageText); // send a message to Matthew directly
-  } else if (senderContext[recipientId].state === 'addKeywordStep1') {
-    addKeywordStep2(recipientId, messageText);
+  } else if (senderContext[recipientId].state === 'Select Date and Time') {
+    sendAppointmentMessage(2464058527010934, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordText') {
     addKeywordTextStep2(recipientId, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordButton') {
@@ -652,6 +651,20 @@ function sendTextMessage(recipientId, messageText) {
     },
     "message": {
       "text": messageText,
+      "metadata": "DEVELOPER_DEFINED_METADATA"
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
+function sendAppointmentMessage(recipientId, messageText) {
+  var messageData = {
+    "recipient": {
+      "id": recipientId
+    },
+    "message": {
+      "text": firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment on " + messageText,
       "metadata": "DEVELOPER_DEFINED_METADATA"
     }
   };
@@ -1149,7 +1162,7 @@ function setupGetStartedButton() {
         "text": "Greeting text for default local !"
       }, {
         "locale": "en_US",
-        "text": "LETS GET THE SHIT ROLLING TWICE!"
+        "text": "LETS GET IT ON THE WAY ROLLING TWICE!"
       }]
     }
   }, function (error, response, body) {
@@ -1194,7 +1207,7 @@ function AddPersistentMenu() {
                 {
                   "title": "Technical",
                   "type": "postback",
-                  "payload": "TECHNICAL"
+                  "payload": "technical"
                 }
               ]
             },
