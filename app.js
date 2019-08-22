@@ -718,7 +718,7 @@ function sendAppointmentMessage(messageText) {
       "id": "2464058527010934"
     },
     "message": {
-      "text": firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
+      "text": firstName + " " + lastName + " (" + recipientID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
       "metadata": "DEVELOPER_DEFINED_METADATA"
     }
   };
@@ -1168,7 +1168,7 @@ function sendDateReply(recipientId) {
       id: recipientId
     },
     message: {
-      text: firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + days[tomorrow.getDay()],
+      text: firstName + " " + lastName + " (" + recipientID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + days[tomorrow.getDay()],
       metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
