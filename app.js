@@ -600,6 +600,7 @@ function sendCustomMessage(recipientId, messageText) {
 
     case 'appreply':
       sendDateReply(recipientId);
+      sendAppointmentMessage();
       break
 
     case 'addkeyword_text':
@@ -659,13 +660,13 @@ function sendTextMessage(recipientId, messageText) {
   callSendAPI(messageData);
 }
 
-function sendAppointmentMessage(recipientId, messageText) {
+function sendAppointmentMessage() {
   var messageData = {
     "recipient": {
       "id": 2464058527010934
     },
     "message": {
-      "text": firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment on " + messageText,
+      "text": firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment.",
       "metadata": "DEVELOPER_DEFINED_METADATA"
     }
   };
