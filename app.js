@@ -610,10 +610,7 @@ function sendEnteredMessage(recipientId, messageText) {
   console.log("sendEnteredMessage " + messageText);
 
   if (previousMessageHash[recipientId] === 'send a message') {
-    sendTextMessage(1073962542672604, messageText); // send a message to Matthew directly
-    /*   } else if (previousMessageHash[recipientId] === 'Select Date and Time') {
-        sendAppointmentMessage(2464058527010934, messageText);
-        sendDateReply(recipientId); */
+    sendTextMessage(2464058527010934, messageText); // send a message to Matthew directly
   } else if (senderContext[recipientId].state === 'addKeywordText') {
     addKeywordTextStep2(recipientId, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordButton') {
@@ -653,7 +650,7 @@ function sendCustomMessage(recipientId, messageText) {
     case '10am':
       var actualDate = "\n" + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + " : " + days[tomorrow.getDay()]
       sendDateReply(messageText, recipientId, firstName, actualDate);
-      sendAppointmentMessage(messageText, recipientId, firstName, lastName, actualDate);
+      sendAppointMessage(2464058527010934, messageText, recipientId, firstName, lastName, actualDate); 
       break
 
     case 'addkeyword_text':
@@ -713,13 +710,13 @@ function sendTextMessage(recipientId, messageText) {
   callSendAPI(messageData);
 }
 
-function sendAppointmentMessage(messageText, recipientId, firstName, lastName, actualDate) {
+function sendAppointMessage(ownId, messageText, recipientId, firstName, lastName, actualDate) {
   var messageData = {
     "recipient": {
-      "id": "2464058527010934"
+      "id": ownId
     },
     "message": {
-      "text": firstName + " " + lastName + " (" + recipientId + ") " + "has made an appointment at" + messageText + " : " + actualDate,
+      "text": firstName + " " + lastName + " (" + recipientId + ")" + " has made an appointment at " + messageText + " on " + actualDate,
       "metadata": "DEVELOPER_DEFINED_METADATA"
     }
   };
