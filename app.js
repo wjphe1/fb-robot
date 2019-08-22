@@ -30,6 +30,30 @@ var senderContext = {};
 var isStopped = false;
 
 
+var today = new Date();
+var tomorrow = new Date();
+var third = new Date();
+var fourth = new Date();
+var fifth = new Date();
+var sixth = new Date();
+var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+if (today.getDay() == 6 ) {
+tomorrow.setDate(today.getDate() + 2);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 0 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 1 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 3);
+} else if (today.getDay() == 2 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 3);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 3 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 3);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 4 )  {
+  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 3);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+} else if (today.getDay() == 5 )  {
+  tomorrow.setDate(today.getDate() + 3);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
+}
+
 var app = express();
 
 app.set('port', process.env.PORT || 5000);
@@ -598,9 +622,9 @@ function sendCustomMessage(recipientId, messageText) {
       sendDateSelection(recipientId);
       break
 
-    case 'appreply':
+    case 'appreplyone':
       sendDateReply(recipientId);
-      sendAppointmentMessage();
+      sendAppointmentMessage(messageText);
       break
 
     case 'addkeyword_text':
@@ -660,13 +684,13 @@ function sendTextMessage(recipientId, messageText) {
   callSendAPI(messageData);
 }
 
-function sendAppointmentMessage() {
+function sendAppointmentMessage(messageText) {
   var messageData = {
     "recipient": {
-      "id": 2464058527010934
+      "id": "2464058527010934"
     },
     "message": {
-      "text": firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment.",
+      "text": firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
       "metadata": "DEVELOPER_DEFINED_METADATA"
     }
   };
@@ -891,31 +915,6 @@ function sendGenericMessage(recipientId) {
   callSendAPI(messageData);
 }
 
-var today = new Date();
-var tomorrow = new Date();
-var third = new Date();
-var fourth = new Date();
-var fifth = new Date();
-var sixth = new Date();
-var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-
-if (today.getDay() == 6 ) {
-tomorrow.setDate(today.getDate() + 2);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 0 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 1 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 3);
-} else if (today.getDay() == 2 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 3);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 3 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 3);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 4 )  {
-  tomorrow.setDate(today.getDate() + 1);third.setDate(tomorrow.getDate() + 3);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 5 )  {
-  tomorrow.setDate(today.getDate() + 3);third.setDate(tomorrow.getDate() + 1);fourth.setDate(third.getDate() + 1);fifth.setDate(fourth.getDate() + 1);sixth.setDate(fifth.getDate() + 1);
-}
-
-
 function sendDateSelection(recipientId) {
   var messageData = {
     recipient: {
@@ -932,17 +931,17 @@ function sendDateSelection(recipientId) {
               "buttons": [{
                   "type": "postback",
                   "title": "10:00",
-                  "payload": "appreply"
+                  "payload": "appreplyone"
                 },
                 {
                   "type": "postback",
                   "title": "13:00",
-                  "payload": "appreply"
+                  "payload": "appreplytwo"
                 },
                 {
                   "type": "postback",
                   "title": "16:00",
-                  "payload": "appreply"
+                  "payload": "appreplythree"
                 }
               ]
             },
@@ -1141,7 +1140,7 @@ function sendDateReply(recipientId) {
       id: recipientId
     },
     message: {
-      text: "Your appointment request has been send to the authorities. Thank you for your support!",
+      text: firstName + " " + lastName + " (" + senderID + ") " + "has made an appointment at" + messageText + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],",
       metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
