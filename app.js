@@ -206,18 +206,15 @@ app.get('/db', function(req,res,next) {
       console.log('Connection established to', url);
   
       // do some work here with the database.
-      var dbo = db.db("heroku_rvfs2pvf");
-
-      dbo.createCollection("id_table", function(err, res) {
+      db.createCollection("users", function(err, res) {
         if (err) {
           console.log('Unable to create table: ', err);
         } else {
           console.log('Successfully built table on', url);
+          //Close connection
           db.close();
         }
       });
-      //Close connection
-      db.close();
     }
   });
 })
