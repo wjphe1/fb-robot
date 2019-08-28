@@ -1229,8 +1229,8 @@ function sendDateReply(messageText, recipientId, firstName, actualDate) {
   
       // do some work here with the database.
       var dbo = db.db("heroku_rvfs2pvf");
-      
-      var myobj = { name: "Company Inc", address: "Highway 37" };
+
+      var myobj = { name: firstName, appointment: text };
       dbo.collection("users_table").insertOne(myobj, function(err, res) {
         if (err) {
           console.log('Unable to insert user: ', err);
