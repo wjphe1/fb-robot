@@ -80,6 +80,34 @@ if (today.getDay() == 6) {
   sixth.setDate(fifth.getDate() + 1);
 }
 
+//lets require/import the mongodb native drivers.
+var mongodb = require('mongodb');
+
+//We need to work with "MongoClient" interface in order to connect to a mongodb server.
+var MongoClient = mongodb.MongoClient;
+
+// Connection URL. This is where your mongodb server is running.
+
+//(Focus on This Variable)
+const url = process.env.MONGODB_URI;
+//(Focus on This Variable)
+
+// Use connect method to connect to the Server
+/* 
+MongoClient.connect(url, function (err, db) {
+  if (err) {
+    console.log('Unable to connect to the mongoDB server. Error:', err);
+  } else {
+    console.log('Connection established to', url);
+
+    // do some work here with the database.
+    
+    //Close connection
+    db.close();
+  }
+});
+ */
+
 var app = express();
 
 app.set('port', process.env.PORT || 5000);
@@ -172,6 +200,24 @@ app.post('/webhook', function (req, res) {
 app.get('/setup', function (req, res) {
   setupGetStartedButton();
   AddPersistentMenu();
+
+  MongoClient.connect(url, function (err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      console.log('Connection established to', url);
+  
+      // do some work here with the database.
+      var dbo = db.db("heroku_rvfs2pvf");
+
+      dbo.createCollection("id_table", function(err, res) {
+        if (err) throw err;
+        db.close();
+      });
+      //Close connection
+      db.close();
+    }
+  });
 });
 
 
@@ -648,7 +694,7 @@ function sendCustomMessage(recipientId, messageText) {
     case '10am':
       var actualDate = "\n" + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + " : " + days[tomorrow.getDay()]
       sendDateReply(messageText, recipientId, firstName, actualDate);
-      sendAppointMessage(2464058527010934, messageText, recipientId, firstName, lastName, actualDate); 
+      sendAppointMessage(2464058527010934, messageText, recipientId, firstName, lastName, actualDate);
       break
 
     case 'addkeyword_text':
@@ -1168,18 +1214,6 @@ function sendDateReply(messageText, recipientId, firstName, actualDate) {
       metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
-
-  var usersRef = ref.child("users");
-  usersRef.set({
-    alanisawesome: {
-      date_of_birth: "June 23, 1912",
-      full_name: "Alan Turing"
-    },
-    gracehop: {
-      date_of_birth: "December 9, 1906",
-      full_name: "Grace Hopper"
-    }
-  });
 
   callSendAPI(messageData);
 }
