@@ -211,8 +211,12 @@ app.get('/setup', function (req, res) {
       var dbo = db.db("heroku_rvfs2pvf");
 
       dbo.createCollection("id_table", function(err, res) {
-        if (err) throw err;
-        db.close();
+        if (err) {
+          console.log('Unable to connect to the mongoDB server. Error:', err);
+        } else {
+          console.log('Successfully built table on', url);
+          db.close();
+        }
       });
       //Close connection
       db.close();
