@@ -1221,6 +1221,28 @@ function sendDateReply(messageText, recipientId, firstName, actualDate) {
     }
   };
 
+  MongoClient.connect(url, function (err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      console.log('Connection established to', url);
+  
+      // do some work here with the database.
+      var dbo = db.db("heroku_rvfs2pvf");
+      
+      var myobj = { name: "Company Inc", address: "Highway 37" };
+      dbo.collection("users_table").insertOne(myobj, function(err, res) {
+        if (err) {
+          console.log('Unable to insert user: ', err);
+        } else {
+          console.log('Successfully inserted user', url);
+          //Close connection
+          db.close();
+        }
+      });
+    }
+  });
+
   callSendAPI(messageData);
 }
 
