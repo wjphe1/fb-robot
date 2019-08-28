@@ -197,9 +197,7 @@ app.post('/webhook', function (req, res) {
   }
 });
 
-app.get('/setup', function (req, res) {
-  setupGetStartedButton();
-  AddPersistentMenu();
+app.get('/db', function(req,res,next) {
 
   MongoClient.connect(url, function (err, db) {
     if (err) {
@@ -212,7 +210,7 @@ app.get('/setup', function (req, res) {
 
       dbo.createCollection("id_table", function(err, res) {
         if (err) {
-          console.log('Unable to connect to the mongoDB server. Error:', err);
+          console.log('Unable to create table: ', err);
         } else {
           console.log('Successfully built table on', url);
           db.close();
@@ -222,6 +220,11 @@ app.get('/setup', function (req, res) {
       db.close();
     }
   });
+})
+
+app.get('/setup', function (req, res) {
+  setupGetStartedButton();
+  AddPersistentMenu();
 });
 
 
