@@ -22,8 +22,8 @@
             },
             {
               "type": "postback",
-              "title": "Send Me",
-              "payload": "send me"
+              "title": "Product Quotations",
+              "payload": "quotation"
             }
             ]
           }, 
