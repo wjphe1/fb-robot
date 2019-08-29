@@ -1131,8 +1131,13 @@ function sendLocation(recipientId) {
           "element": {
             "title": "Your current location",
             "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:blue%7Clabel:S%7C" + address + "&key=" + GOOGLEMAPS_API,
-            "item_url": "http://maps.apple.com/maps?q=" + address,
-            "webview_height_ratio": "compact"
+            "buttons": [
+              {
+                "type": "web_url",
+                "url": "http://maps.apple.com/maps?q=" + address,
+                "title": "Open in Maps",
+                "webview_height_ratio": "compact"
+              }
           }
         }
       }
