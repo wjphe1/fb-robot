@@ -131,6 +131,9 @@ const VALIDATION_TOKEN = process.env.VALIDATION_TOKEN;
 // Generate a page access token for your page from the App Dashboard
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
+// Google maps API
+const GOOGLEMAPS_API = process.env.GOOGLEMAPS_API;
+
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
   console.error("Missing config values");
   process.exit(1);
@@ -1112,6 +1115,8 @@ function sendDateSelection(recipientId) {
 
 function sendLocation(recipientId) {
   
+  address = "Jalan Raja Uda"
+  address = address.Replace(' ','-')
   var lat = 5.4281314;
   var long = 100.38686;
   
@@ -1127,8 +1132,9 @@ function sendLocation(recipientId) {
           "elements": {
             "element": {
               "title": "Your current location",
-              "image_url": "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=" + lat + "," + long + "&zoom=25&markers=" + lat + "," + long,
-              "item_url": "http:\/\/maps.apple.com\/maps?q=" + lat + "," + long + "&z=16"
+              "image_url":"https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:blue%7Clabel:S%7C"+address+"&key="+GOOGLEMAPS_API,
+              "item_url": "http://maps.apple.com/maps?q=" + address,
+              "webview_height_ratio": "compact"
             }
           }
         }
