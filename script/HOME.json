@@ -40,8 +40,8 @@
             }, 
             {
               "type": "postback",
-              "title": "remove menu",
-              "payload": "remove menu"
+              "title": "Send location",
+              "payload": "location"
             },
             {
               "type": "postback",
