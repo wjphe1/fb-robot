@@ -2,17 +2,20 @@
   "attachment": {
     "type": "template",
     "payload": {
-      "template_type": "list",
-      "top_element_style": "compact",
-      "elements": [{
-        "title": "Classic White T-Shirt",
-        "subtitle": "100% Cotton, 200% Comfortable",
-        "buttons": [{
-          "type": "web_url",
-          "title": "Buy",
-          "url": "https://peterssendreceiveapp.ngrok.io/shop?item=100"
-        }]
-      }]
+      "template_type": "media",
+      "elements": [
+        {
+           "media_type": "image",
+           "url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/pepe.png",
+           "buttons": [
+              {
+                 "type": "web_url",
+                 "url": "www.facebook.com",
+                 "title": "View Website"
+              }
+           ]
+        }
+     ]
     }
   }
 }
