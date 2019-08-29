@@ -22,8 +22,8 @@
             },
             {
               "type": "postback",
-              "title": "Product Quotations",
-              "payload": "quotation"
+              "title": "Quotations",
+              "payload": "quotations"
             }
             ]
           }, 
