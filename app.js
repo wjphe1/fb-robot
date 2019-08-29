@@ -1212,7 +1212,6 @@ function sendQuickReply(recipientId) {
     },
     message: {
       text: "Some regular buttons and a location test",
-      metadata: "DEVELOPER_DEFINED_METADATA",
       quick_replies: [{
           "content_type": "text",
           "title": "Action",
