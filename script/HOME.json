@@ -40,7 +40,7 @@
             }, 
             {
               "type": "postback",
-              "title": "Send location",
+              "title": "📍 Send location",
               "payload": "location"
             },
             {
