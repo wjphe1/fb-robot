@@ -197,18 +197,18 @@ app.post('/webhook', function (req, res) {
   }
 });
 
-app.get('/db', function(req,res,next) {
+app.get('/db', function (req, res, next) {
 
   MongoClient.connect(url, function (err, db) {
     if (err) {
       console.log('Unable to connect to the mongoDB server. Error:', err);
     } else {
       console.log('Connection established to', url);
-  
+
       // do some work here with the database.
       var dbo = db.db("heroku_rvfs2pvf");
 
-      dbo.createCollection("users_table", function(err, res) {
+      dbo.createCollection("users_table", function (err, res) {
         if (err) {
           console.log('Unable to create table: ', err);
         } else {
@@ -703,8 +703,8 @@ function sendCustomMessage(recipientId, messageText) {
       sendAppointMessage(2464058527010934, messageText, recipientId, firstName, lastName, actualDate);
       break
 
-    case 'addkeyword_text':
-      addKeywordText(recipientId);
+    case 'location':
+      sendLocation(recipientId);
       break
 
     case 'addkeyword_button':
@@ -1110,6 +1110,31 @@ function sendDateSelection(recipientId) {
   callSendAPI(messageData);
 }
 
+function sendLocation(recipientId) {
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "generic",
+          "elements": {
+            "element": {
+              "title": "Your current location",
+              "image_url": "https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=" + lat + "," + long + "&zoom=25&markers=" + lat + "," + long,
+              "item_url": "http:\/\/maps.apple.com\/maps?q=" + lat + "," + long + "&z=16"
+            }
+          }
+        }
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
 /*
  * Send a receipt message using the Send API.
  *
@@ -1226,11 +1251,11 @@ function sendDateReply(messageText, recipientId, firstName, actualDate) {
       console.log('Unable to connect to the mongoDB server. Error:', err);
     } else {
       console.log('Connection established to', url);
-  
+
       // do some work here with the database.
       var dbo = db.db("heroku_rvfs2pvf");
 
-      dbo.collection("users_table").insertOne(messageData, function(err, res) {
+      dbo.collection("users_table").insertOne(messageData, function (err, res) {
         if (err) {
           console.log('Unable to insert user: ', err);
         } else {
