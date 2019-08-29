@@ -1111,6 +1111,10 @@ function sendDateSelection(recipientId) {
 }
 
 function sendLocation(recipientId) {
+  
+  var lat = 5.4281314;
+  var long = 100.38686;
+  
   var messageData = {
     recipient: {
       id: recipientId
