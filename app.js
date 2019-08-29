@@ -1115,7 +1115,7 @@ function sendDateSelection(recipientId) {
 
 function sendLocation(recipientId) {
   
-  address = "Jalan Raja Uda"
+  var address = "Jalan Raja Uda"
   address = address.Replace(' ','-')
   var lat = 5.4281314;
   var long = 100.38686;
