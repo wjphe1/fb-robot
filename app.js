@@ -1134,18 +1134,9 @@ function sendLocation(recipientId) {
               "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:blue%7Clabel:S%7CJalan-Raja-Uda&key=" + GOOGLEMAPS_API,
               "buttons": [{
                   "type": "web_url",
-                  "url": "https://www.messenger.com/t/HealthTap",
-                  "title": "Health Tap"
-                },
-                {
-                  "type": "web_url",
-                  "url": "http://www.messenger.com/t/EstherBot",
-                  "title": "Esther's cool bot"
-                },
-                {
-                  "type": "web_url",
-                  "url": "http://www.messenger.com/t/techcrunch",
-                  "title": "TechCrunch news bot"
+                  "url": "http://maps.apple.com/maps?q=Jalan-Raja-Uda",
+                  "title": "View on Maps",
+                  "webview_height_ratio": "compact"
                 }
               ]
             }
