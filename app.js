@@ -1130,12 +1130,12 @@ function sendLocation(recipientId) {
           "template_type": "generic",
           "elements": [{
               "title": "Your current location",
-              "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:blue%7Clabel:S%7CJalan-Raja-Uda-Butterworth&zoom=12&maptype=roadmap&key=" + GOOGLEMAPS_API,
+              "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:blue%7Clabel:S%7CJalan-Raja-Uda-Butterworth&zoom=36&maptype=roadmap&key=" + GOOGLEMAPS_API,
               "buttons": [{
                   "type": "web_url",
                   "url": "http://maps.apple.com/maps?q=Jalan-Raja-Uda-Butterworth",
                   "title": "View on Maps",
-                  "webview_height_ratio": "compact"
+                  "webview_height_ratio": "tall"
                 }
               ]
             }
