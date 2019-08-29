@@ -1128,16 +1128,28 @@ function sendLocation(recipientId) {
         "type": "template",
         "payload": {
           "template_type": "generic",
-          "element": [{
-            "title": "Your current location",
-            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:blue%7Clabel:S%7C" + address + "&key=" + GOOGLEMAPS_API,
-            "buttons": [{
-              "type": "web_url",
-              "url": "http://maps.apple.com/maps?q=" + address,
-              "title": "Open in Maps",
-              "webview_height_ratio": "compact"
-            }]
-          }]
+          "elements": [{
+              "title": "Your current location",
+              "item_url": "http://maps.apple.com/maps?q=Jalan-Raja-Uda",
+              "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:blue%7Clabel:S%7CJalan-Raja-Uda&key=" + GOOGLEMAPS_API,
+              "buttons": [{
+                  "type": "web_url",
+                  "url": "https://www.messenger.com/t/HealthTap",
+                  "title": "Health Tap"
+                },
+                {
+                  "type": "web_url",
+                  "url": "http://www.messenger.com/t/EstherBot",
+                  "title": "Esther's cool bot"
+                },
+                {
+                  "type": "web_url",
+                  "url": "http://www.messenger.com/t/techcrunch",
+                  "title": "TechCrunch news bot"
+                }
+              ]
+            }
+          ]
         }
       }
     }
