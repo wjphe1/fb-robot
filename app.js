@@ -1161,13 +1161,21 @@ function sendLocation(recipientId, messageText) {
 
 function sendDirection(recipientId, messageText) {
 
-  // for distance (returns JSON containing values for distance[m] and time[s])
-  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key= API_KEY
-  // for directions
-  // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
-
   var current = messageText.toUpperCase();
   var hcurrent = current.replace(/ /g, "-");
+  var distance = {};
+  var time = {};
+
+  var uri = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + hcurrent + "&destinations=" + haddress + "&key=" + GOOGLEMAPS_API;
+  request(uri, {
+    json: true
+  }, (err, res, body) => {
+    if (err) {
+      return console.log(err);
+    }
+    distance = body.rows;
+    time = body.rows
+  });
 
   var messageData = {
     recipient: {
@@ -1178,7 +1186,7 @@ function sendDirection(recipientId, messageText) {
         "type": "template",
         "payload": {
           "template_type": "button",
-          "text": "From: "+current+"\nTo: "+address+"\nTravel distance: "+"km"+"\nTravel time: ",
+          "text": "From: " + current + "\nTo: " + address + "\nTravel distance: " + distance + "km" + "\nTravel time: " + time,
           "buttons": [{
             "type": "web_url",
             "url": "https://www.google.com.my/maps/dir/" + address + "/" + current,
