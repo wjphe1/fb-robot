@@ -40,8 +40,8 @@
             }, 
             {
               "type": "postback",
-              "title": "📍 Send location",
-              "payload": "location"
+              "title": "📍 Show location",
+              "payload": "show on map"
             },
             {
               "type": "postback",
