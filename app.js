@@ -1181,7 +1181,7 @@ function sendDirection(recipientId, messageText) {
           "text": "From: "+current+"\nTo: "+address+"\nTravel distance: "+"km"+"\nTravel time: ",
           "buttons": [{
             "type": "web_url",
-            "url": "https://www.messenger.com",
+            "url": "https://www.google.com.my/maps/dir/" + address + "/" + current,
             "title": "View on Map",
             "webview_height_ratio": "tall"
           }]
