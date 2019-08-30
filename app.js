@@ -1168,6 +1168,8 @@ function sendDirection(recipientId, messageText) {
   var returned_json = {};
 
   var uri = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + hcurrent + "&destinations=" + haddress + "&key=" + GOOGLEMAPS_API;
+  console.log(uri)
+  
   request(uri, {
     json: true
   }, (err, res, body) => {
