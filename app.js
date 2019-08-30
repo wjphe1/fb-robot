@@ -17,6 +17,7 @@ const
   express = require('express'),
   https = require('https'),
   request = require('request');
+  axios = require('axios');
 
 var fs = require('fs');
 
@@ -1169,18 +1170,17 @@ function sendDirection(recipientId, messageText) {
 
   var uri = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + hcurrent + "&destinations=" + haddress + "&key=" + GOOGLEMAPS_API;
   console.log(uri)
-  
-  request(uri, {
-    json: true
-  }, (err, res, body) => {
-    if (err) {
-      return console.log(err);
-    }
-    returned_json = body;
+
+  axios.get(uri)
+  .then(response => {
+    console.log(response);
+  })
+  .catch(error => {
+    console.log(error);
   });
 
-  distance = (distance + returned_json.rows[0].elements[0].distance.value)/1000;
-  time = returned_json.rows[0].elements[0].duration.text;
+/*   distance = (distance + returned_json.rows[0].elements[0].distance.value)/1000;
+  time = returned_json.rows[0].elements[0].duration.text; */
 
   var messageData = {
     recipient: {
