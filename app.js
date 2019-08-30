@@ -26,6 +26,7 @@ const jokes = require('./script/JOKES.json');
 
 var previousMessageHash = {};
 var address = '';
+var haddress = '';
 var senderContext = {};
 var isStopped = false;
 
@@ -1117,8 +1118,8 @@ function sendLocation(recipientId, messageText) {
   // for directions
   // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
 
-  var address = messageText
-  var address = address.replace(/ /g, "-");
+  address = messageText.toUpperCase();
+  haddress = address.replace(/ /g, "-");
 
   var messageData = {
     recipient: {
@@ -1131,10 +1132,10 @@ function sendLocation(recipientId, messageText) {
           "template_type": "generic",
           "elements": [{
             "title": messageText,
-            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Clabel:Y%7C" + address + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
+            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Clabel:Y%7C" + haddress + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
             "buttons": [{
                 "type": "web_url",
-                "url": "http://maps.apple.com/maps?q=" + address,
+                "url": "http://maps.apple.com/maps?q=" + haddress,
                 "title": "View on Maps",
                 "webview_height_ratio": "tall"
               },
@@ -1165,8 +1166,8 @@ function sendDirection(recipientId, messageText) {
   // for directions
   // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
 
-  var current = messageText
-  var current = current.replace(/ /g, "-");
+  var current = messageText.toUpperCase();
+  var hcurrent = current.replace(/ /g, "-");
 
   var messageData = {
     recipient: {
@@ -1177,11 +1178,12 @@ function sendDirection(recipientId, messageText) {
         "type": "template",
         "payload": {
           "template_type": "button",
-          "text": "From: "+current+"\nTo: "+address+"\nTotal travel distance: "+"km"+"\nTotal travel time: ",
+          "text": "From: "+current+"\nTo: "+address+"\nTravel distance: "+"km"+"\nTravel time: ",
           "buttons": [{
             "type": "web_url",
             "url": "https://www.messenger.com",
-            "title": "View on Map"
+            "title": "View on Map",
+            "webview_height_ratio": "tall"
           }]
         }
       }
