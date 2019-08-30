@@ -1166,10 +1166,8 @@ function sendDirection(recipientId, messageText) {
 
   request(uri, { json: true }, (err, res, body) => {
     if (err) { return console.log(err); }
-    var distance = body.rows[0].elements[0].distance.value;
+    var distance = (body.rows[0].elements[0].distance.value)/1000;
     var time = body.rows[0].elements[0].duration.text
-    console.log(distance);
-    console.log(time);
 
     var messageData = {
       recipient: {
@@ -1180,7 +1178,7 @@ function sendDirection(recipientId, messageText) {
           "type": "template",
           "payload": {
             "template_type": "button",
-            "text": "From: " + current + "\nTo: " + address + "\nTravel distance: " + distance + "km" + "\nTravel time: " + time,
+            "text": "From: " + body.origin_addresses + "\nTo: " + body.destination_addresses + "\nTravel distance: " + distance + " km" + "\nTravel time: " + time,
             "buttons": [{
               "type": "web_url",
               "url": "https://www.google.com.my/maps/dir/" + address + "/" + current,
