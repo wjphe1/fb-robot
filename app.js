@@ -664,8 +664,8 @@ function sendEnteredMessage(recipientId, messageText) {
 
   if (previousMessageHash[recipientId] === 'send a message') {
     sendTextMessage(2464058527010934, messageText); // send a message to Matthew directly
-  } else if (senderContext[recipientId].state === 'addKeywordText') {
-    addKeywordTextStep2(recipientId, messageText);
+  } else if (previousMessageHash[recipientId] === 'show on map') {
+    sendLocation(recipientId, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordButton') {
     addKeywordButtonStep2(recipientId, messageText);
   } else if (emojiString.indexOf(messageText.substring(0, 2)) > -1) {
@@ -704,10 +704,6 @@ function sendCustomMessage(recipientId, messageText) {
       var actualDate = "\n" + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + " : " + days[tomorrow.getDay()]
       sendDateReply(messageText, recipientId, firstName, actualDate);
       sendAppointMessage(2464058527010934, messageText, recipientId, firstName, lastName, actualDate);
-      break
-
-    case 'location':
-      sendLocation(recipientId);
       break
 
     case 'addkeyword_button':
@@ -1113,9 +1109,10 @@ function sendDateSelection(recipientId) {
   callSendAPI(messageData);
 }
 
-function sendLocation(recipientId) {
+function sendLocation(recipientId, messageText) {
 
-  var address = "Monash-University-Malaysia"
+  var address = messageText
+  var address = address.replace(/ /g, "-");
 
   var messageData = {
     recipient: {
