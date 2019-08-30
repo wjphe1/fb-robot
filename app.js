@@ -26,7 +26,6 @@ const jokes = require('./script/JOKES.json');
 
 var previousMessageHash = {};
 var address = '';
-var haddress = '';
 var senderContext = {};
 var isStopped = false;
 
@@ -1118,8 +1117,7 @@ function sendLocation(recipientId, messageText) {
   // for directions
   // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
 
-  address = messageText.toUpperCase();
-  haddress = address.replace(/ /g, "-");
+  address = messageText.replace(/ /g, "-");
 
   var messageData = {
     recipient: {
@@ -1132,10 +1130,10 @@ function sendLocation(recipientId, messageText) {
           "template_type": "generic",
           "elements": [{
             "title": messageText,
-            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Clabel:Y%7C" + haddress + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
+            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Clabel:Y%7C" + address + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
             "buttons": [{
                 "type": "web_url",
-                "url": "http://maps.apple.com/maps?q=" + haddress,
+                "url": "http://maps.apple.com/maps?q=" + address,
                 "title": "View on Maps",
                 "webview_height_ratio": "tall"
               },
@@ -1161,46 +1159,42 @@ function sendLocation(recipientId, messageText) {
 
 function sendDirection(recipientId, messageText) {
 
-  var current = messageText.toUpperCase();
-  var hcurrent = current.replace(/ /g, "-");
-  var distance = 0;
-  var time = "";
+  var current = messageText.replace(/ /g, "-");
 
-  var uri = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + hcurrent + "&destinations=" + haddress + "&key=" + GOOGLEMAPS_API;
+  var uri = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + current + "&destinations=" + address + "&key=" + GOOGLEMAPS_API;
   console.log(uri)
 
   request(uri, { json: true }, (err, res, body) => {
     if (err) { return console.log(err); }
-    distance = distance + body.rows[0].elements[0].distance.value;
-    time = body.rows[0].elements[0].duration.text
-    console.log(body.rows[0].elements[0].distance.value);
-    console.log(body.rows[0].elements[0].duration.text);
-  });
+    var distance = body.rows[0].elements[0].distance.value;
+    var time = body.rows[0].elements[0].duration.text
+    console.log(distance);
+    console.log(time);
 
-  
-
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "button",
-          "text": "From: " + current + "\nTo: " + address + "\nTravel distance: " + distance + "km" + "\nTravel time: " + time,
-          "buttons": [{
-            "type": "web_url",
-            "url": "https://www.google.com.my/maps/dir/" + address + "/" + current,
-            "title": "View on Map",
-            "webview_height_ratio": "tall"
-          }]
+    var messageData = {
+      recipient: {
+        id: recipientId
+      },
+      message: {
+        "attachment": {
+          "type": "template",
+          "payload": {
+            "template_type": "button",
+            "text": "From: " + current + "\nTo: " + address + "\nTravel distance: " + distance + "km" + "\nTravel time: " + time,
+            "buttons": [{
+              "type": "web_url",
+              "url": "https://www.google.com.my/maps/dir/" + address + "/" + current,
+              "title": "View on Map",
+              "webview_height_ratio": "tall"
+            }]
+          }
         }
       }
-    }
-  };
+    };
+  
+    callSendAPI(messageData);
+  });
 
-  callSendAPI(messageData);
 }
 
 /*
