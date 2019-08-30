@@ -668,6 +668,8 @@ function sendEnteredMessage(recipientId, messageText) {
     sendLocation(recipientId, messageText);
   } else if (previousMessageHash[recipientId] === 'mylocation') {
     sendLocation(recipientId, messageText);
+  } else if (previousMessageHash[recipientId] === 'getdirection') {
+    sendDirection(recipientId, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordButton') {
     addKeywordButtonStep2(recipientId, messageText);
   } else if (emojiString.indexOf(messageText.substring(0, 2)) > -1) {
@@ -1128,7 +1130,7 @@ function sendLocation(recipientId, messageText) {
           "template_type": "generic",
           "elements": [{
             "title": messageText,
-            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:yellow%7Clabel:Y%7C" + address + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
+            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Clabel:Y%7C" + address + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
             "buttons": [{
                 "type": "web_url",
                 "url": "http://maps.apple.com/maps?q=" + address,
@@ -1139,8 +1141,46 @@ function sendLocation(recipientId, messageText) {
                 "type": "postback",
                 "title": "Another one",
                 "payload": "show on map"
+              },
+              {
+                "type": "postback",
+                "title": "Travel Distance and Time",
+                "payload": "getdirection"
               }
             ]
+          }]
+        }
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
+function sendDirection(recipientId, messageText) {
+
+  // for distance (returns JSON containing values for distance[m] and time[s])
+  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key= API_KEY
+  // for directions
+  // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
+
+  var current = messageText
+  var current = current.replace(/ /g, "-");
+
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "button",
+          "text": "From: "+current+"\nTo: "+address+"\nTotal travel distance: "+"km"+"\nTotal travel time: ",
+          "buttons": [{
+            "type": "web_url",
+            "url": "https://www.messenger.com",
+            "title": "View on Map"
           }]
         }
       }
