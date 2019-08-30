@@ -1163,8 +1163,8 @@ function sendDirection(recipientId, messageText) {
 
   var current = messageText.toUpperCase();
   var hcurrent = current.replace(/ /g, "-");
-  var distance = {};
-  var time = {};
+  var distance = 0;
+  var time = "";
 
   var uri = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + hcurrent + "&destinations=" + haddress + "&key=" + GOOGLEMAPS_API;
   request(uri, {
@@ -1173,8 +1173,8 @@ function sendDirection(recipientId, messageText) {
     if (err) {
       return console.log(err);
     }
-    distance = body.rows;
-    time = body.rows
+    distance = (distance + body.rows[0].elements[0].distance.value)/1000;
+    time = body.rows[0].elements[0].duration.text;
   });
 
   var messageData = {
