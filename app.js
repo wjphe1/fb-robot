@@ -666,6 +666,8 @@ function sendEnteredMessage(recipientId, messageText) {
     sendTextMessage(2464058527010934, messageText); // send a message to Matthew directly
   } else if (previousMessageHash[recipientId] === 'show on map') {
     sendLocation(recipientId, messageText);
+  } else if (previousMessageHash[recipientId] === 'mylocation') {
+    sendLocation(recipientId, messageText);
   } else if (senderContext[recipientId].state === 'addKeywordButton') {
     addKeywordButtonStep2(recipientId, messageText);
   } else if (emojiString.indexOf(messageText.substring(0, 2)) > -1) {
@@ -704,10 +706,6 @@ function sendCustomMessage(recipientId, messageText) {
       var actualDate = "\n" + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + " : " + days[tomorrow.getDay()]
       sendDateReply(messageText, recipientId, firstName, actualDate);
       sendAppointMessage(2464058527010934, messageText, recipientId, firstName, lastName, actualDate);
-      break
-
-    case 'addkeyword_button':
-      addKeywordButton(recipientId);
       break
 
     case 'addkeyword_button1':
@@ -1111,6 +1109,11 @@ function sendDateSelection(recipientId) {
 
 function sendLocation(recipientId, messageText) {
 
+  // for distance (returns JSON containing values for distance[m] and time[s])
+  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key= API_KEY
+  // for directions
+  // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
+
   var address = messageText
   var address = address.replace(/ /g, "-");
 
@@ -1124,22 +1127,21 @@ function sendLocation(recipientId, messageText) {
         "payload": {
           "template_type": "generic",
           "elements": [{
-              "title": "Your current location",
-              "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:yellow%7Clabel:Y%7C"+address+"&maptype=roadmap&key=" + GOOGLEMAPS_API,
-              "buttons": [{
-                  "type": "web_url",
-                  "url": "http://maps.apple.com/maps?q="+address,
-                  "title": "View on Maps",
-                  "webview_height_ratio": "tall"
-                },
-                {
-                  "type": "postback",
-                  "title": "Another one",
-                  "payload": "show on map"
-                }
-              ]
-            }
-          ]
+            "title": messageText,
+            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:yellow%7Clabel:Y%7C" + address + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
+            "buttons": [{
+                "type": "web_url",
+                "url": "http://maps.apple.com/maps?q=" + address,
+                "title": "View on Maps",
+                "webview_height_ratio": "tall"
+              },
+              {
+                "type": "postback",
+                "title": "Another one",
+                "payload": "show on map"
+              }
+            ]
+          }]
         }
       }
     }
