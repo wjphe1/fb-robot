@@ -1171,6 +1171,8 @@ function sendDirection(recipientId, messageText) {
 
   request(uri, { json: true }, (err, res, body) => {
     if (err) { return console.log(err); }
+    distance = distance + body.rows[0].elements[0].distance.value;
+    time = body.rows[0].elements[0].duration.text
     console.log(body.rows[0].elements[0].distance.value);
     console.log(body.rows[0].elements[0].duration.text);
   });
