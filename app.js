@@ -1125,7 +1125,7 @@ function sendLocation(recipientId, messageText) {
           "template_type": "generic",
           "elements": [{
               "title": "Your current location",
-              "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:yellow%7Clabel:Y%7C"+address+"&zoom=18&maptype=roadmap&key=" + GOOGLEMAPS_API,
+              "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:yellow%7Clabel:Y%7C"+address+"&maptype=roadmap&key=" + GOOGLEMAPS_API,
               "buttons": [{
                   "type": "web_url",
                   "url": "http://maps.apple.com/maps?q="+address,
