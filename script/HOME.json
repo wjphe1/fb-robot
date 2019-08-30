@@ -45,8 +45,8 @@
             },
             {
               "type": "postback",
-              "title": "add menu",
-              "payload": "add menu"
+              "title": "📍 My location",
+              "payload": "mylocation"
             }
             ]
           }, 
