@@ -25,7 +25,7 @@ const scriptRules = require('./script.json');
 const jokes = require('./script/JOKES.json');
 
 var previousMessageHash = {};
-var address = "";
+var address = '';
 var senderContext = {};
 var isStopped = false;
 
