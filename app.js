@@ -1144,7 +1144,7 @@ function sendLocation(recipientId, messageText) {
               },
               {
                 "type": "postback",
-                "title": "Travel Distance and Time",
+                "title": "Directions",
                 "payload": "getdirection"
               }
             ]
