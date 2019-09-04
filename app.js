@@ -81,71 +81,35 @@ if (today.getDay() == 6) {
   sixth.setDate(fifth.getDate() + 1);
 }
 
-var app = express();
+//lets require/import the mongodb native drivers.
+var mongodb = require('mongodb');
 
-// ----------------------------------------------- GOOGLE CLOUD DATABASE STARTS -------------------------------------------------
-// By default, the client will authenticate using the service account file
-// specified by the GOOGLE_APPLICATION_CREDENTIALS environment variable and use
-// the project specified by the GOOGLE_CLOUD_PROJECT environment variable. See
-// https://github.com/GoogleCloudPlatform/google-cloud-node/blob/master/docs/authentication.md
-// These environment variables are set automatically on Google App Engine
-const {Datastore} = require('@google-cloud/datastore');
+//We need to work with "MongoClient" interface in order to connect to a mongodb server.
+var MongoClient = mongodb.MongoClient;
 
-// Instantiate a datastore client
-const datastore = new Datastore();
+// Connection URL. This is where your mongodb server is running.
 
-/**
- * Insert a visit record into the database.
- *
- * @param {object} visit The visit record to insert.
- */
-const insertVisit = visit => {
-  return datastore.save({
-    key: datastore.key('visit'),
-    data: visit,
-  });
-};
+//(Focus on This Variable)
+const url = process.env.MONGODB_URI;
+//(Focus on This Variable)
 
-/**
- * Retrieve the latest 10 visit records from the database.
- */
-const getVisits = () => {
-  const query = datastore
-    .createQuery('visit')
-    .order('timestamp', {descending: true})
-    .limit(10);
+// Use connect method to connect to the Server
+/* 
+MongoClient.connect(url, function (err, db) {
+  if (err) {
+    console.log('Unable to connect to the mongoDB server. Error:', err);
+  } else {
+    console.log('Connection established to', url);
 
-  return datastore.runQuery(query);
-};
-
-app.get('/', async (req, res, next) => {
-  // Create a visit record to be stored in the database
-  const visit = {
-    timestamp: new Date(),
-    // Store a hash of the visitor's ip address
-    userIp: crypto
-      .createHash('sha256')
-      .update(req.ip)
-      .digest('hex')
-      .substr(0, 7),
-  };
-
-  try {
-    await insertVisit(visit);
-    const [entities] = await getVisits();
-    const visits = entities.map(
-      entity => `Time: ${entity.timestamp}, AddrHash: ${entity.userIp}`
-    );
-    res
-      .status(200)
-      .set('Content-Type', 'text/plain')
-      .send(`Last 10 visits:\n${visits.join('\n')}`)
-      .end();
-  } catch (error) {
-    next(error);
+    // do some work here with the database.
+    
+    //Close connection
+    db.close();
   }
 });
-// ----------------------------------------------- GOOGLE CLOUD DATABASE ENDS -------------------------------------------------
+ */
+
+var app = express();
 
 app.set('port', process.env.PORT || 5000);
 app.use(bodyParser.json({
@@ -237,10 +201,35 @@ app.post('/webhook', function (req, res) {
   }
 });
 
+app.get('/db', function (req, res, next) {
+
+  MongoClient.connect(url, function (err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      console.log('Connection established to', url);
+
+      // do some work here with the database.
+      var dbo = db.db("heroku_rvfs2pvf");
+
+      dbo.createCollection("users_table", function (err, res) {
+        if (err) {
+          console.log('Unable to create table: ', err);
+        } else {
+          console.log('Successfully built table on', url);
+          //Close connection
+          db.close();
+        }
+      });
+    }
+  });
+})
+
 app.get('/setup', function (req, res) {
   setupGetStartedButton();
   AddPersistentMenu();
 });
+
 
 /*
  * Verify that the callback came from Facebook. Using the App Secret from 
@@ -1315,6 +1304,27 @@ function sendDateReply(messageText, recipientId, firstName, actualDate) {
       metadata: "DEVELOPER_DEFINED_METADATA",
     }
   };
+
+  MongoClient.connect(url, function (err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      console.log('Connection established to', url);
+
+      // do some work here with the database.
+      var dbo = db.db("heroku_rvfs2pvf");
+
+      dbo.collection("users_table").insertOne(messageData, function (err, res) {
+        if (err) {
+          console.log('Unable to insert user: ', err);
+        } else {
+          console.log('Successfully inserted user', url);
+          //Close connection
+          db.close();
+        }
+      });
+    }
+  });
 
   callSendAPI(messageData);
 }
