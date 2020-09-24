@@ -431,9 +431,14 @@ function handleReceivedMessage(event) {
           isStopped = false;
         }
         break */
+        
+      case 'quick reply':
+        sendQuickReply(senderID);
+        break
 
       default:
         sendEnteredMessage(senderID, messageText);
+
     }
   } else if (messageAttachments) {
     if (messageAttachments[0].payload.url)
