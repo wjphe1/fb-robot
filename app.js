@@ -1480,10 +1480,10 @@ function setupGetStartedButton() {
     json: {
       "greeting": [{
         "locale": "default",
-        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
+        "text": "Hi {{user_full_name}}! Thanks for getting in touch with us on Messenger. Please GET STARTED to learn more about us."
       }, {
         "locale": "en_US",
-        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
+        "text": "Hi {{user_full_name}}! Thanks for getting in touch with us on Messenger. Please GET STARTED to learn more about us."
       }, {
         "locale": "zh_CN",
         "text": "你好！欢迎来到彭兄弟食品工业官方。有什么问题请随时联络我们。更多详情请前往官方网站 https://pheebrothers.com/ 。"
@@ -1509,7 +1509,7 @@ function AddPersistentMenu() {
     json: {
       "persistent_menu": [{
           "locale": "default",
-          "composer_input_disabled": false,
+          "composer_input_disabled": true,
           "call_to_actions": [{
               "title": "Home",
               "type": "postback",
