@@ -5,15 +5,15 @@
          "template_type": "generic",
           "elements": [
           {
-            "title": "Book now!",
-            "subtitle": "Welcome to my appointment maker",
-            "item_url": "http://www.messenger.com/",               
-            "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/pepe.png",
+            "title": "Bots",
+            "subtitle": "The rise of the Facebook Bot!",
+            "item_url": "http://www.dynamic-memory.com/",               
+            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/robot.png",
             "buttons": [
             {
               "type": "postback",
-              "title": "Make an Appointment",
-              "payload": "appointment"
+              "title": "What is this Bot?",
+              "payload": "What is this Robot?"
             },
             {
               "type": "postback",
@@ -22,8 +22,8 @@
             },
             {
               "type": "postback",
-              "title": "Media",
-              "payload": "quotation"
+              "title": "I want a Bot!",
+              "payload": "I want one"
             }
             ]
           }, 
@@ -40,13 +40,13 @@
             }, 
             {
               "type": "postback",
-              "title": "📍 Show location",
-              "payload": "show on map"
+              "title": "Social media",
+              "payload": "Social media"
             },
             {
               "type": "postback",
-              "title": "📍 My location",
-              "payload": "mylocation"
+              "title": "Matthew's bio",
+              "payload": "bio"
             }
             ]
           }, 
