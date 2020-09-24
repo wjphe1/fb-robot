@@ -26,36 +26,14 @@
           ]
         },
         {
-          "title": "Custom Examples",
-          "subtitle": "A few small apps to give an idea of the possibilites",
-          "item_url": "https://dynamic-memory.com",
-          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/home.png",
-          "buttons": [{
-              "type": "postback",
-              "title": "Tell me a joke 😜",
-              "payload": "joke"
-            },
-            {
-              "type": "postback",
-              "title": "Random Image",
-              "payload": "image"
-            },
-            {
-              "type": "postback",
-              "title": "Who am I?",
-              "payload": "who"
-            }
-          ]
-        },
-        {
-          "title": "Reach Out to Us",
+          "title": "Learn More",
           "subtitle": "Find out more about us through a few available channels.",
           "item_url": "https://www.pheebrothers.com/contact-us",
-          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/react_out.jpg",
+          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/reachout.jpg",
           "buttons": [{
               "type": "postback",
-              "title": "Contacts",
-              "payload": "Contact"
+              "title": "Company Location",
+              "payload": "location"
             },
             {
               "type": "web_url",
@@ -67,6 +45,29 @@
               "title": "Website",
               "url": "https://pheebrothers.com/",
               "webview_height_ratio": "full"
+            }
+          ]
+        },
+        {
+          "title": "Reach Out to Us",
+          "subtitle": "Send us your enquiries and what you want to know more about!",
+          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/contact.jpg",
+          "buttons": [{
+              "type": "web_url",
+              "url": "mailto:info@pheebrothers.com",
+              "title": "Email",
+              "webview_height_ratio": "tall"
+            },
+            {
+              "type": "web_url",
+              "url": "https://wa.me/60104021500",
+              "title": "Whatsapp",
+              "webview_height_ratio": "tall"
+            },
+            {
+              "type": "web_url",
+              "url": "tel:+60104021500",
+              "title": "Call us"
             }
           ]
         },
