@@ -798,11 +798,6 @@ function sendJoke(recipientId) {
           "content_type": "text",
           "title": "Another 😂",
           "payload": "joke"
-        },
-        {
-          "content_type": "text",
-          "title": "Home",
-          "payload": "home"
         }
       ]
     }
@@ -1499,10 +1494,13 @@ function setupGetStartedButton() {
     json: {
       "greeting": [{
         "locale": "default",
-        "text": "Greeting text for default local !"
+        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
       }, {
         "locale": "en_US",
-        "text": "LETS GET IT ON THE WAY ROLLING TWICE!"
+        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
+      },{
+        "locale": "zh_CN",
+        "text": "你好！欢迎来到彭兄弟食品工业官方。有什么问题请随时联络我们。更多详情请前往官方网站 https://pheebrothers.com/ 。"
       }]
     }
   }, function (error, response, body) {
@@ -1532,30 +1530,10 @@ function AddPersistentMenu() {
               "payload": "HOME"
             },
             {
-              "title": "Nested Menu Example",
-              "type": "nested",
-              "call_to_actions": [{
-                  "title": "Who am I",
-                  "type": "postback",
-                  "payload": "WHO"
-                },
-                {
-                  "title": "Joke",
-                  "type": "postback",
-                  "payload": "joke"
-                },
-                {
-                  "title": "Technical",
-                  "type": "postback",
-                  "payload": "technical"
-                }
-              ]
-            },
-            {
               "type": "web_url",
-              "title": "Latest News",
-              "url": "http://foxnews.com",
-              "webview_height_ratio": "full"
+              "title": "View Website",
+              "url": "http://pheebrothers.com",
+              "webview_height_ratio": "tall"
             }
           ]
         },
@@ -1711,4 +1689,5 @@ app.listen(app.get('port'), function () {
   console.log('Node app is running on port', app.get('port'));
 });
 
-module.exports = app;
+module.exports = app;rts = app;
+
