@@ -11,110 +11,29 @@
 'use strict';
 
 var customRules = {};
-const
+const 
   bodyParser = require('body-parser'),
   crypto = require('crypto'),
   express = require('express'),
-  https = require('https'),
+  https = require('https'),  
   request = require('request');
 
 var fs = require('fs');
 
 const _ = require('lodash');
-const scriptRules = require('./script.json');
-const jokes = require('./script/JOKES.json');
+const   scriptRules = require('./script.json');
+const   jokes = require('./script/JOKES.json');
+
 
 var previousMessageHash = {};
-var address = '';
 var senderContext = {};
 var isStopped = false;
 
-var today = new Date();
-var tomorrow = new Date();
-var third = new Date();
-var fourth = new Date();
-var fifth = new Date();
-var sixth = new Date();
-var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-if (today.getDay() == 6) {
-  tomorrow.setDate(today.getDate() + 2);
-  third.setDate(tomorrow.getDate() + 1);
-  fourth.setDate(third.getDate() + 1);
-  fifth.setDate(fourth.getDate() + 1);
-  sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 0) {
-  tomorrow.setDate(today.getDate() + 1);
-  third.setDate(tomorrow.getDate() + 1);
-  fourth.setDate(third.getDate() + 1);
-  fifth.setDate(fourth.getDate() + 1);
-  sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 1) {
-  tomorrow.setDate(today.getDate() + 1);
-  third.setDate(tomorrow.getDate() + 1);
-  fourth.setDate(third.getDate() + 1);
-  fifth.setDate(fourth.getDate() + 1);
-  sixth.setDate(fifth.getDate() + 3);
-} else if (today.getDay() == 2) {
-  tomorrow.setDate(today.getDate() + 1);
-  third.setDate(tomorrow.getDate() + 1);
-  fourth.setDate(third.getDate() + 1);
-  fifth.setDate(fourth.getDate() + 3);
-  sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 3) {
-  tomorrow.setDate(today.getDate() + 1);
-  third.setDate(tomorrow.getDate() + 1);
-  fourth.setDate(third.getDate() + 3);
-  fifth.setDate(fourth.getDate() + 1);
-  sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 4) {
-  tomorrow.setDate(today.getDate() + 1);
-  third.setDate(tomorrow.getDate() + 3);
-  fourth.setDate(third.getDate() + 1);
-  fifth.setDate(fourth.getDate() + 1);
-  sixth.setDate(fifth.getDate() + 1);
-} else if (today.getDay() == 5) {
-  tomorrow.setDate(today.getDate() + 3);
-  third.setDate(tomorrow.getDate() + 1);
-  fourth.setDate(third.getDate() + 1);
-  fifth.setDate(fourth.getDate() + 1);
-  sixth.setDate(fifth.getDate() + 1);
-}
-
-//lets require/import the mongodb native drivers.
-var mongodb = require('mongodb');
-
-//We need to work with "MongoClient" interface in order to connect to a mongodb server.
-var MongoClient = mongodb.MongoClient;
-
-// Connection URL. This is where your mongodb server is running.
-
-//(Focus on This Variable)
-const url = process.env.MONGODB_URI;
-//(Focus on This Variable)
-
-// Use connect method to connect to the Server
-/* 
-MongoClient.connect(url, function (err, db) {
-  if (err) {
-    console.log('Unable to connect to the mongoDB server. Error:', err);
-  } else {
-    console.log('Connection established to', url);
-
-    // do some work here with the database.
-    
-    //Close connection
-    db.close();
-  }
-});
- */
 
 var app = express();
 
 app.set('port', process.env.PORT || 5000);
-app.use(bodyParser.json({
-  verify: verifyRequestSignature
-}));
+app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
 /*
@@ -124,16 +43,13 @@ app.use(express.static('public'));
  */
 
 // App Secret can be retrieved from the App Dashboard
-const APP_SECRET = process.env.APP_SECRET;
+const APP_SECRET = process.env.APP_SECRET ;
 
 // Arbitrary value used to validate a webhook
 const VALIDATION_TOKEN = process.env.VALIDATION_TOKEN;
 
 // Generate a page access token for your page from the App Dashboard
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-
-// Google maps API
-const GOOGLEMAPS_API = process.env.GOOGLEMAPS_API;
 
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
   console.error("Missing config values");
@@ -145,15 +61,15 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
  * setup is the same token used here.
  *
  */
-app.get('/webhook', function (req, res) {
+app.get('/webhook', function(req, res) {
   if (req.query['hub.mode'] === 'subscribe' &&
-    req.query['hub.verify_token'] === VALIDATION_TOKEN) {
+      req.query['hub.verify_token'] === VALIDATION_TOKEN) {
     console.log("Validating webhook");
     res.status(200).send(req.query['hub.challenge']);
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);
-  }
+    res.sendStatus(403);          
+  }  
 });
 
 
@@ -171,12 +87,12 @@ app.post('/webhook', function (req, res) {
   if (data.object == 'page') {
     // Iterate over each entry
     // There may be multiple if batched
-    data.entry.forEach(function (pageEntry) {
+    data.entry.forEach(function(pageEntry) {
       var pageID = pageEntry.id;
       var timeOfEvent = pageEntry.time;
 
       // Iterate over each messaging event
-      pageEntry.messaging.forEach(function (messagingEvent) {
+      pageEntry.messaging.forEach(function(messagingEvent) {
         if (messagingEvent.optin) {
           receivedAuthentication(messagingEvent);
         } else if (messagingEvent.message) {
@@ -201,36 +117,6 @@ app.post('/webhook', function (req, res) {
   }
 });
 
-app.get('/db', function (req, res, next) {
-
-  MongoClient.connect(url, function (err, db) {
-    if (err) {
-      console.log('Unable to connect to the mongoDB server. Error:', err);
-    } else {
-      console.log('Connection established to', url);
-
-      // do some work here with the database.
-      var dbo = db.db("heroku_rvfs2pvf");
-
-      dbo.createCollection("users_table", function (err, res) {
-        if (err) {
-          console.log('Unable to create table: ', err);
-        } else {
-          console.log('Successfully built table on', url);
-          //Close connection
-          db.close();
-        }
-      });
-    }
-  });
-})
-
-app.get('/setup', function (req, res) {
-  setupGetStartedButton();
-  AddPersistentMenu();
-});
-
-
 /*
  * Verify that the callback came from Facebook. Using the App Secret from 
  * the App Dashboard, we can verify the signature that is sent with each 
@@ -252,8 +138,8 @@ function verifyRequestSignature(req, res, buf) {
     var signatureHash = elements[1];
 
     var expectedHash = crypto.createHmac('sha1', APP_SECRET)
-      .update(buf)
-      .digest('hex');
+                        .update(buf)
+                        .digest('hex');
 
     if (signatureHash != expectedHash) {
       throw new Error("Couldn't validate the request signature: " + APP_SECRET);
@@ -270,7 +156,8 @@ function verifyRequestSignature(req, res, buf) {
  *
  */
 function receivedAuthentication(event) {
-  if (isStopped == true) {
+  if(isStopped == true)
+  {
     return;
   }
   var data = req.body;
@@ -286,7 +173,7 @@ function receivedAuthentication(event) {
   var passThroughParam = event.optin.ref;
 
   console.log("Received authentication for user %d and page %d with pass " +
-    "through param '%s' at %d", senderID, recipientID, passThroughParam,
+    "through param '%s' at %d", senderID, recipientID, passThroughParam, 
     timeOfAuth);
 
   // When an authentication is received, we'll send a message back to the sender
@@ -295,7 +182,7 @@ function receivedAuthentication(event) {
 }
 
 var firstName = "undefined";
-var lastName = "undefined";
+var lastName = "undefined"; 
 
 /*
  * Message Event
@@ -312,7 +199,7 @@ var lastName = "undefined";
  * 
  */
 function receivedMessage(event) {
-  callGetLocaleAPI(event, handleReceivedMessage);
+      callGetLocaleAPI(event, handleReceivedMessage);
 }
 
 function handleReceivedMessage(event) {
@@ -334,25 +221,25 @@ function handleReceivedMessage(event) {
 
   if (isEcho) {
     // Just logging message echoes to console
-    console.log("Received echo for message %s and app %d with metadata %s",
+    console.log("Received echo for message %s and app %d with metadata %s", 
       messageId, appId, metadata);
     return;
   } else if (quickReply) {
     var quickReplyPayload = quickReply.payload;
-    //    console.log("Quick reply for message %s with payload %s",
-    //     messageId, quickReplyPayload);
+//    console.log("Quick reply for message %s with payload %s",
+ //     messageId, quickReplyPayload);
 
     messageText = quickReplyPayload;
-    sendCustomMessage(senderID, messageText);
+    sendCustomMessage(senderID,messageText);
     return;
   }
 
   if (messageText) {
-    if ((isStopped == true) && (messageText !== "start")) {
+    if((isStopped == true) && (messageText !== "start")){
       return;
     }
-    console.log("Received message for user %d and page %d at %d with message: %s",
-      senderID, recipientID, timeOfMessage, messageText);
+  console.log("Received message for user %d and page %d at %d with message: %s", 
+    senderID, recipientID, timeOfMessage,messageText);
 
     // If we receive a text message, check to see if it matches any special
     // keywords and send back the corresponding example. Otherwise, just echo
@@ -392,54 +279,54 @@ function handleReceivedMessage(event) {
 
       case 'quick reply':
         sendQuickReply(senderID);
-        break
+        break        
 
       case 'read receipt':
         sendReadReceipt(senderID);
-        break
+        break        
 
       case 'typing on':
         sendTypingOn(senderID);
-        break
+        break        
 
       case 'typing off':
         sendTypingOff(senderID);
-        break
+        break        
 
       case 'user info':
-        if (firstName)
-          sendTextMessage(senderID, firstName);
-        break
+        if(firstName)
+            sendTextMessage(senderID,firstName);
+        break        
 
-        /* case 'add menu':
-          addPersistentMenu();
-          break
+      case 'add menu':
+        addPersistentMenu();
+        break        
 
-        case 'remove menu':
-          removePersistentMenu();
-          break */
+      case 'remove menu':
+        removePersistentMenu();
+        break        
 
-      case 'stop': // Stop the Bot from responding if the admin sends this messages
-        if (senderID == 2464058527010934) {
-          console.log("Stoppping bot");
-          isStopped = true;
-        }
-        break
+      case 'stop':  // Stop the Bot from responding if the admin sends this messages
+         if(senderID ==  1073962542672604) {
+            console.log("Stoppping bot");
+            isStopped = true;
+         }
+         break
 
       case 'start': // start up again
-        if (senderID == 2464058527010934) {
-          console.log("Starting bot");
-          isStopped = false;
-        }
-        break
+         if(senderID ==  1073962542672604)  {
+            console.log("Starting bot");
+            isStopped = false;
+         }
+         break
 
       default:
-        sendEnteredMessage(senderID, messageText);
+         sendEnteredMessage(senderID, messageText);
 
     }
   } else if (messageAttachments) {
-    if (messageAttachments[0].payload.url)
-      sendJsonMessage(senderID, messageAttachments[0].payload.url);
+    if(messageAttachments[0].payload.url)
+        sendJsonMessage(senderID, messageAttachments[0].payload.url);
   }
 }
 
@@ -453,7 +340,8 @@ function handleReceivedMessage(event) {
  */
 
 function receivedDeliveryConfirmation(event) {
-  if (isStopped == true) {
+  if(isStopped == true)
+  {
     return;
   }
   var senderID = event.sender.id;
@@ -464,8 +352,8 @@ function receivedDeliveryConfirmation(event) {
   var sequenceNumber = delivery.seq;
 
   if (messageIDs) {
-    messageIDs.forEach(function (messageID) {
-      console.log("Received delivery confirmation for message ID: %s",
+    messageIDs.forEach(function(messageID) {
+      console.log("Received delivery confirmation for message ID: %s", 
         messageID);
     });
   }
@@ -483,7 +371,8 @@ function receivedDeliveryConfirmation(event) {
  */
 
 function receivedPostback(event) {
-  if (isStopped == true) {
+  if(isStopped == true)
+  {
     return;
   }
   callGetLocaleAPI(event, handleReceivedPostback);
@@ -498,12 +387,12 @@ function handleReceivedPostback(event) {
   // button for Structured Messages. 
   var payload = event.postback.payload;
 
-  console.log("Received postback for user %d and page %d with payload '%s' " +
+  console.log("Received postback for user %d and page %d with payload '%s' " + 
     "at %d", senderID, recipientID, payload, timeOfPostback);
 
   // When a postback is called, we'll send a message back to the sender to 
   // let them know it was successful
-  sendCustomMessage(senderID, payload);
+  sendCustomMessage(senderID,payload);
 }
 
 /*
@@ -514,7 +403,8 @@ function handleReceivedPostback(event) {
  * 
  */
 function receivedMessageRead(event) {
-  if (isStopped == true) {
+  if(isStopped == true)
+  {
     return;
   }
   var senderID = event.sender.id;
@@ -638,107 +528,116 @@ function sendFileMessage(recipientId) {
   callSendAPI(messageData);
 }
 
-function sendSingleJsonMessage(recipientId, filename) {
-  try {
-    filename = "./script/" + filename;
-    var json = require(filename);
-    var fullMessage = {
-      recipient: {
-        id: recipientId
-      }
-    };
-    fullMessage.message = json;
-    callSendAPI(fullMessage);
-  } catch (e) {
-    console.log("error in sendSingleJsonMessage " + e.message + " " + filename + " " + fullMessage);
-  }
+function sendSingleJsonMessage(recipientId,filename) {
+   try {
+      filename = "./script/" + filename;
+      var json  = require(filename);
+      var fullMessage = { recipient: { id: recipientId  }};
+      fullMessage.message = json;
+      callSendAPI(fullMessage);
+   }
+   catch (e)
+   {
+      console.log("error in sendSingleJsonMessage " + e.message + " " + filename + " " + fullMessage);
+   }
 }
 
 /* 
    Special handling for message that the sender typed in 
 */
 
-function sendEnteredMessage(recipientId, messageText) {
-  var emojiString = ["😀", "😁", "😂", "😃", "😄", "😅", "😆", "😇", "😈", "👿", "😉", "😊", "☺️", "😋", "😌", "😍", "😎", "😏", "😐", "😑", "😒", "😓", "😔", "😕", "😖", "😗", "😘", "😙", "😚", "😛", "😜", "😝", "😞", "😟", "😠", "😡", "😢", "😣", "😤", "😥", "😦", "😧", "😨", "😩", "😪", "😫", "😬", "😭", "😮", "😯", "😰", "😱", "😲", "😳", "😴", "😵", "😶", "😷", "😸", "😹", "😺", "😻", "😼", "😽", "😾", "😿", "🙀", "👣", "👤", "👥", "👶", "👶🏻", "👶🏼", "👶🏽", "👶🏾", "👶🏿", "👦", "👦🏻", "👦🏼", "👦🏽", "👦🏾", "👦🏿", "👧", "👧🏻", "👧🏼", "👧🏽", "👧🏾", "👧🏿", "👨", "👨🏻", "👨🏼", "👨🏽", "👨🏾", "👨🏿", "👩", "👩🏻", "👩🏼", "👩🏽", "👩🏾", "👩🏿", "👪", "👨‍👩‍👧", "👨‍👩‍👧‍👦", "👨‍👩‍👦‍👦", "👨‍👩‍👧‍👧", "👩‍👩‍👦", "👩‍👩‍👧", "👩‍👩‍👧‍👦", "👩‍👩‍👦‍👦", "👩‍👩‍👧‍👧", "👨‍👨‍👦", "👨‍👨‍👧", "👨‍👨‍👧‍👦", "👨‍👨‍👦‍👦", "👨‍👨‍👧‍👧", "👫", "👬", "👭", "👯", "👰", "👰🏻", "👰🏼", "👰🏽", "👰🏾", "👰🏿", "👱", "👱🏻", "👱🏼", "👱🏽", "👱🏾", "👱🏿", "👲", "👲🏻", "👲🏼", "👲🏽", "👲🏾", "👲🏿", "👳", "👳🏻", "👳🏼", "👳🏽", "👳🏾", "👳🏿", "👴", "👴🏻", "👴🏼", "👴🏽", "👴🏾", "👴🏿", "👵", "👵🏻", "👵🏼", "👵🏽", "👵🏾", "👵🏿", "👮", "👮🏻", "👮🏼", "👮🏽", "👮🏾", "👮🏿", "👷", "👷🏻", "👷🏼", "👷🏽", "👷🏾", "👷🏿", "👸", "👸🏻", "👸🏼", "👸🏽", "👸🏾", "👸🏿", "💂", "💂🏻", "💂🏼", "💂🏽", "💂🏾", "💂🏿", "👼", "👼🏻", "👼🏼", "👼🏽", "👼🏾", "👼🏿", "🎅", "🎅🏻", "🎅🏼", "🎅🏽", "🎅🏾", "🎅🏿", "👻", "👹", "👺", "💩", "💀", "👽", "👾", "🙇", "🙇🏻", "🙇🏼", "🙇🏽", "🙇🏾", "🙇🏿", "💁", "💁🏻", "💁🏼", "💁🏽", "💁🏾", "💁🏿", "🙅", "🙅🏻", "🙅🏼", "🙅🏽", "🙅🏾", "🙅🏿", "🙆", "🙆🏻", "🙆🏼", "🙆🏽", "🙆🏾", "🙆🏿", "🙋", "🙋🏻", "🙋🏼", "🙋🏽", "🙋🏾", "🙋🏿", "🙎", "🙎🏻", "🙎🏼", "🙎🏽", "🙎🏾", "🙎🏿", "🙍", "🙍🏻", "🙍🏼", "🙍🏽", "🙍🏾", "🙍🏿", "💆", "💆🏻", "💆🏼", "💆🏽", "💆🏾", "💆🏿", "💇", "💇🏻", "💇🏼", "💇🏽", "💇🏾", "💇🏿", "💑", "👩‍❤️‍👩", "👨‍❤️‍👨", "💏", "👩‍❤️‍💋‍👩", "👨‍❤️‍💋‍👨", "🙌", "🙌🏻", "🙌🏼", "🙌🏽", "🙌🏾", "🙌🏿", "👏", "👏🏻", "👏🏼", "👏🏽", "👏🏾", "👏🏿", "👂", "👂🏻", "👂🏼", "👂🏽", "👂🏾", "👂🏿", "👀", "👃", "👃🏻", "👃🏼", "👃🏽", "👃🏾", "👃🏿", "👄", "💋", "👅", "💅", "💅🏻", "💅🏼", "💅🏽", "💅🏾", "💅🏿", "👋", "👋🏻", "👋🏼", "👋🏽", "👋🏾", "👋🏿", "👍", "👍🏻", "👍🏼", "👍🏽", "👍🏾", "👍🏿", "👎", "👎🏻", "👎🏼", "👎🏽", "👎🏾", "👎🏿", "☝", "☝🏻", "☝🏼", "☝🏽", "☝🏾", "☝🏿", "👆", "👆🏻", "👆🏼", "👆🏽", "👆🏾", "👆🏿", "👇", "👇🏻", "👇🏼", "👇🏽", "👇🏾", "👇🏿", "👈", "👈🏻", "👈🏼", "👈🏽", "👈🏾", "👈🏿", "👉", "👉🏻", "👉🏼", "👉🏽", "👉🏾", "👉🏿", "👌", "👌🏻", "👌🏼", "👌🏽", "👌🏾", "👌🏿", "✌", "✌🏻", "✌🏼", "✌🏽", "✌🏾", "✌🏿", "👊", "👊🏻", "👊🏼", "👊🏽", "👊🏾", "👊🏿", "✊", "✊🏻", "✊🏼", "✊🏽", "✊🏾", "✊🏿", "✋", "✋🏻", "✋🏼", "✋🏽", "✋🏾", "✋🏿", "💪", "💪🏻", "💪🏼", "💪🏽", "💪🏾", "💪🏿", "👐", "👐🏻", "👐🏼", "👐🏽", "👐🏾", "👐🏿", "🙏", "🙏🏻", "🙏🏼", "🙏🏽", "🙏🏾", "🙏🏿", "🌱", "🌲", "🌳", "🌴", "🌵", "🌷", "🌸", "🌹", "🌺", "🌻", "🌼", "💐", "🌾", "🌿", "🍀", "🍁", "🍂", "🍃", "🍄", "🌰", "🐀", "🐁", "🐭", "🐹", "🐂", "🐃", "🐄", "🐮", "🐅", "🐆", "🐯", "🐇", "🐰", "🐈", "🐱", "🐎", "🐴", "🐏", "🐑", "🐐", "🐓", "🐔", "🐤", "🐣", "🐥", "🐦", "🐧", "🐘", "🐪", "🐫", "🐗", "🐖", "🐷", "🐽", "🐕", "🐩", "🐶", "🐺", "🐻", "🐨", "🐼", "🐵", "🙈", "🙉", "🙊", "🐒", "🐉", "🐲", "🐊", "🐍", "🐢", "🐸", "🐋", "🐳", "🐬", "🐙", "🐟", "🐠", "🐡", "🐚", "🐌", "🐛", "🐜", "🐝", "🐞", "🐾", "⚡️", "🔥", "🌙", "☀️", "⛅️", "☁️", "💧", "💦", "☔️", "💨", "❄️", "🌟", "⭐️", "🌠", "🌄", "🌅", "🌈", "🌊", "🌋", "🌌", "🗻", "🗾", "🌐", "🌍", "🌎", "🌏", "🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘", "🌚", "🌝", "🌛", "🌜", "🌞", "🍅", "🍆", "🌽", "🍠", "🍇", "🍈", "🍉", "🍊", "🍋", "🍌", "🍍", "🍎", "🍏", "🍐", "🍑", "🍒", "🍓", "🍔", "🍕", "🍖", "🍗", "🍘", "🍙", "🍚", "🍛", "🍜", "🍝", "🍞", "🍟", "🍡", "🍢", "🍣", "🍤", "🍥", "🍦", "🍧", "🍨", "🍩", "🍪", "🍫", "🍬", "🍭", "🍮", "🍯", "🍰", "🍱", "🍲", "🍳", "🍴", "🍵", "☕️", "🍶", "🍷", "🍸", "🍹", "🍺", "🍻", "🍼", "🎀", "🎁", "🎂", "🎃", "🎄", "🎋", "🎍", "🎑", "🎆", "🎇", "🎉", "🎊", "🎈", "💫", "✨", "💥", "🎓", "👑", "🎎", "🎏", "🎐", "🎌", "🏮", "💍", "❤️", "💔", "💌", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "💜", "💛", "💚", "💙", "🏃", "🏃🏻", "🏃🏼", "🏃🏽", "🏃🏾", "🏃🏿", "🚶", "🚶🏻", "🚶🏼", "🚶🏽", "🚶🏾", "🚶🏿", "💃", "💃🏻", "💃🏼", "💃🏽", "💃🏾", "💃🏿", "🚣", "🚣🏻", "🚣🏼", "🚣🏽", "🚣🏾", "🚣🏿", "🏊", "🏊🏻", "🏊🏼", "🏊🏽", "🏊🏾", "🏊🏿", "🏄", "🏄🏻", "🏄🏼", "🏄🏽", "🏄🏾", "🏄🏿", "🛀", "🛀🏻", "🛀🏼", "🛀🏽", "🛀🏾", "🛀🏿", "🏂", "🎿", "⛄️", "🚴", "🚴🏻", "🚴🏼", "🚴🏽", "🚴🏾", "🚴🏿", "🚵", "🚵🏻", "🚵🏼", "🚵🏽", "🚵🏾", "🚵🏿", "🏇", "🏇🏻", "🏇🏼", "🏇🏽", "🏇🏾", "🏇🏿", "⛺️", "🎣", "⚽️", "🏀", "🏈", "⚾️", "🎾", "🏉", "⛳️", "🏆", "🎽", "🏁", "🎹", "🎸", "🎻", "🎷", "🎺", "🎵", "🎶", "🎼", "🎧", "🎤", "🎭", "🎫", "🎩", "🎪", "🎬", "🎨", "🎯", "🎱", "🎳", "🎰", "🎲", "🎮", "🎴", "🃏", "🀄️", "🎠", "🎡", "🎢", "🚃", "🚞", "🚂", "🚋", "🚝", "🚄", "🚅", "🚆", "🚇", "🚈", "🚉", "🚊", "🚌", "🚍", "🚎", "🚐", "🚑", "🚒", "🚓", "🚔", "🚨", "🚕", "🚖", "🚗", "🚘", "🚙", "🚚", "🚛", "🚜", "🚲", "🚏", "⛽️", "🚧", "🚦", "🚥", "🚀", "🚁", "✈️", "💺", "⚓️", "🚢", "🚤", "⛵️", "🚡", "🚠", "🚟", "🛂", "🛃", "🛄", "🛅", "💴", "💶", "💷", "💵", "🗽", "🗿", "🌁", "🗼", "⛲️", "🏰", "🏯", "🌇", "🌆", "🌃", "🌉", "🏠", "🏡", "🏢", "🏬", "🏭", "🏣", "🏤", "🏥", "🏦", "🏨", "🏩", "💒", "⛪️", "🏪", "🏫", "🇦🇺", "🇦🇹", "🇧🇪", "🇧🇷", "🇨🇦", "🇨🇱", "🇨🇳", "🇨🇴", "🇩🇰", "🇫🇮", "🇫🇷", "🇩🇪", "🇭🇰", "🇮🇳", "🇮🇩", "🇮🇪", "🇮🇱", "🇮🇹", "🇯🇵", "🇰🇷", "🇲🇴", "🇲🇾", "🇲🇽", "🇳🇱", "🇳🇿", "🇳🇴", "🇵🇭", "🇵🇱", "🇵🇹", "🇵🇷", "🇷🇺", "🇸🇦", "🇸🇬", "🇿🇦", "🇪🇸", "🇸🇪", "🇨🇭", "🇹🇷", "🇬🇧", "🇺🇸", "🇦🇪", "🇻🇳", "⌚️", "📱", "📲", "💻", "⏰", "⏳", "⌛️", "📷", "📹", "🎥", "📺", "📻", "📟", "📞", "☎️", "📠", "💽", "💾", "💿", "📀", "📼", "🔋", "🔌", "💡", "🔦", "📡", "💳", "💸", "💰", "💎", "🌂", "👝", "👛", "👜", "💼", "🎒", "💄", "👓", "👒", "👡", "👠", "👢", "👞", "👟", "👙", "👗", "👘", "👚", "👕", "👔", "👖", "🚪", "🚿", "🛁", "🚽", "💈", "💉", "💊", "🔬", "🔭", "🔮", "🔧", "🔪", "🔩", "🔨", "💣", "🚬", "🔫", "🔖", "📰", "🔑", "✉️", "📩", "📨", "📧", "📥", "📤", "📦", "📯", "📮", "📪", "📫", "📬", "📭", "📄", "📃", "📑", "📈", "📉", "📊", "📅", "📆", "🔅", "🔆", "📜", "📋", "📖", "📓", "📔", "📒", "📕", "📗", "📘", "📙", "📚", "📇", "🔗", "📎", "📌", "✂️", "📐", "📍", "📏", "🚩", "📁", "📂", "✒️", "✏️", "📝", "🔏", "🔐", "🔒", "🔓", "📣", "📢", "🔈", "🔉", "🔊", "🔇", "💤", "🔔", "🔕", "💭", "💬", "🚸", "🔍", "🔎", "🚫", "⛔️", "📛", "🚷", "🚯", "🚳", "🚱", "📵", "🔞", "🉑", "🉐", "💮", "㊙️", "㊗️", "🈴", "🈵", "🈲", "🈶", "🈚️", "🈸", "🈺", "🈷", "🈹", "🈳", "🈂", "🈁", "🈯️", "💹", "❇️", "✳️", "❎", "✅", "✴️", "📳", "📴", "🆚", "🅰", "🅱", "🆎", "🆑", "🅾", "🆘", "🆔", "🅿️", "🚾", "🆒", "🆓", "🆕", "🆖", "🆗", "🆙", "🏧", "♈️", "♉️", "♊️", "♋️", "♌️", "♍️", "♎️", "♏️", "♐️", "♑️", "♒️", "♓️", "🚻", "🚹", "🚺", "🚼", "♿️", "🚰", "🚭", "🚮", "▶️", "◀️", "🔼", "🔽", "⏩", "⏪", "⏫", "⏬", "➡️", "⬅️", "⬆️", "⬇️", "↗️", "↘️", "↙️", "↖️", "↕️", "↔️", "🔄", "↪️", "↩️", "⤴️", "⤵️", "🔀", "🔁", "🔂", "#⃣", "0⃣", "1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣", "8⃣", "9⃣", "🔟", "🔢", "🔤", "🔡", "🔠", "ℹ️", "📶", "🎦", "🔣", "➕", "➖", "〰", "➗", "✖️", "✔️", "🔃", "™", "©", "®", "💱", "💲", "➰", "➿", "〽️", "❗️", "❓", "❕", "❔", "‼️", "⁉️", "❌", "⭕️", "💯", "🔚", "🔙", "🔛", "🔝", "🔜", "🌀", "Ⓜ️", "⛎", "🔯", "🔰", "🔱", "⚠️", "♨️", "♻️", "💢", "💠", "♠️", "♣️", "♥️", "♦️", "☑️", "⚪️", "⚫️", "🔘", "🔴", "🔵", "🔺", "🔻", "🔸", "🔹", "🔶", "🔷", "▪️", "▫️", "⬛️", "⬜️", "◼️", "◻️", "◾️", "◽️", "🔲", "🔳", "🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛", "🕜", "🕝", "🕞", "🕟", "🕠", "🕡", "🕢", "🕣", "🕤", "🕥", "🕦", "🕧"]
+function sendEnteredMessage(recipientId,messageText) {
+                var emojiString = ["😀","😁","😂","😃","😄","😅","😆","😇","😈","👿","😉","😊","☺️","😋","😌","😍","😎","😏","😐","😑","😒","😓","😔","😕","😖","😗","😘","😙","😚","😛","😜","😝","😞","😟","😠","😡","😢","😣","😤","😥","😦","😧","😨","😩","😪","😫","😬","😭","😮","😯","😰","😱","😲","😳","😴","😵","😶","😷","😸","😹","😺","😻","😼","😽","😾","😿","🙀","👣","👤","👥","👶","👶🏻","👶🏼","👶🏽","👶🏾","👶🏿","👦","👦🏻","👦🏼","👦🏽","👦🏾","👦🏿","👧","👧🏻","👧🏼","👧🏽","👧🏾","👧🏿","👨","👨🏻","👨🏼","👨🏽","👨🏾","👨🏿","👩","👩🏻","👩🏼","👩🏽","👩🏾","👩🏿","👪","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👩‍👩‍👦","👩‍👩‍👧","👩‍👩‍👧‍👦","👩‍👩‍👦‍👦","👩‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👨‍👨‍👧‍👦","👨‍👨‍👦‍👦","👨‍👨‍👧‍👧","👫","👬","👭","👯","👰","👰🏻","👰🏼","👰🏽","👰🏾","👰🏿","👱","👱🏻","👱🏼","👱🏽","👱🏾","👱🏿","👲","👲🏻","👲🏼","👲🏽","👲🏾","👲🏿","👳","👳🏻","👳🏼","👳🏽","👳🏾","👳🏿","👴","👴🏻","👴🏼","👴🏽","👴🏾","👴🏿","👵","👵🏻","👵🏼","👵🏽","👵🏾","👵🏿","👮","👮🏻","👮🏼","👮🏽","👮🏾","👮🏿","👷","👷🏻","👷🏼","👷🏽","👷🏾","👷🏿","👸","👸🏻","👸🏼","👸🏽","👸🏾","👸🏿","💂","💂🏻","💂🏼","💂🏽","💂🏾","💂🏿","👼","👼🏻","👼🏼","👼🏽","👼🏾","👼🏿","🎅","🎅🏻","🎅🏼","🎅🏽","🎅🏾","🎅🏿","👻","👹","👺","💩","💀","👽","👾","🙇","🙇🏻","🙇🏼","🙇🏽","🙇🏾","🙇🏿","💁","💁🏻","💁🏼","💁🏽","💁🏾","💁🏿","🙅","🙅🏻","🙅🏼","🙅🏽","🙅🏾","🙅🏿","🙆","🙆🏻","🙆🏼","🙆🏽","🙆🏾","🙆🏿","🙋","🙋🏻","🙋🏼","🙋🏽","🙋🏾","🙋🏿","🙎","🙎🏻","🙎🏼","🙎🏽","🙎🏾","🙎🏿","🙍","🙍🏻","🙍🏼","🙍🏽","🙍🏾","🙍🏿","💆","💆🏻","💆🏼","💆🏽","💆🏾","💆🏿","💇","💇🏻","💇🏼","💇🏽","💇🏾","💇🏿","💑","👩‍❤️‍👩","👨‍❤️‍👨","💏","👩‍❤️‍💋‍👩","👨‍❤️‍💋‍👨","🙌","🙌🏻","🙌🏼","🙌🏽","🙌🏾","🙌🏿","👏","👏🏻","👏🏼","👏🏽","👏🏾","👏🏿","👂","👂🏻","👂🏼","👂🏽","👂🏾","👂🏿","👀","👃","👃🏻","👃🏼","👃🏽","👃🏾","👃🏿","👄","💋","👅","💅","💅🏻","💅🏼","💅🏽","💅🏾","💅🏿","👋","👋🏻","👋🏼","👋🏽","👋🏾","👋🏿","👍","👍🏻","👍🏼","👍🏽","👍🏾","👍🏿","👎","👎🏻","👎🏼","👎🏽","👎🏾","👎🏿","☝","☝🏻","☝🏼","☝🏽","☝🏾","☝🏿","👆","👆🏻","👆🏼","👆🏽","👆🏾","👆🏿","👇","👇🏻","👇🏼","👇🏽","👇🏾","👇🏿","👈","👈🏻","👈🏼","👈🏽","👈🏾","👈🏿","👉","👉🏻","👉🏼","👉🏽","👉🏾","👉🏿","👌","👌🏻","👌🏼","👌🏽","👌🏾","👌🏿","✌","✌🏻","✌🏼","✌🏽","✌🏾","✌🏿","👊","👊🏻","👊🏼","👊🏽","👊🏾","👊🏿","✊","✊🏻","✊🏼","✊🏽","✊🏾","✊🏿","✋","✋🏻","✋🏼","✋🏽","✋🏾","✋🏿","💪","💪🏻","💪🏼","💪🏽","💪🏾","💪🏿","👐","👐🏻","👐🏼","👐🏽","👐🏾","👐🏿","🙏","🙏🏻","🙏🏼","🙏🏽","🙏🏾","🙏🏿","🌱","🌲","🌳","🌴","🌵","🌷","🌸","🌹","🌺","🌻","🌼","💐","🌾","🌿","🍀","🍁","🍂","🍃","🍄","🌰","🐀","🐁","🐭","🐹","🐂","🐃","🐄","🐮","🐅","🐆","🐯","🐇","🐰","🐈","🐱","🐎","🐴","🐏","🐑","🐐","🐓","🐔","🐤","🐣","🐥","🐦","🐧","🐘","🐪","🐫","🐗","🐖","🐷","🐽","🐕","🐩","🐶","🐺","🐻","🐨","🐼","🐵","🙈","🙉","🙊","🐒","🐉","🐲","🐊","🐍","🐢","🐸","🐋","🐳","🐬","🐙","🐟","🐠","🐡","🐚","🐌","🐛","🐜","🐝","🐞","🐾","⚡️","🔥","🌙","☀️","⛅️","☁️","💧","💦","☔️","💨","❄️","🌟","⭐️","🌠","🌄","🌅","🌈","🌊","🌋","🌌","🗻","🗾","🌐","🌍","🌎","🌏","🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘","🌚","🌝","🌛","🌜","🌞","🍅","🍆","🌽","🍠","🍇","🍈","🍉","🍊","🍋","🍌","🍍","🍎","🍏","🍐","🍑","🍒","🍓","🍔","🍕","🍖","🍗","🍘","🍙","🍚","🍛","🍜","🍝","🍞","🍟","🍡","🍢","🍣","🍤","🍥","🍦","🍧","🍨","🍩","🍪","🍫","🍬","🍭","🍮","🍯","🍰","🍱","🍲","🍳","🍴","🍵","☕️","🍶","🍷","🍸","🍹","🍺","🍻","🍼","🎀","🎁","🎂","🎃","🎄","🎋","🎍","🎑","🎆","🎇","🎉","🎊","🎈","💫","✨","💥","🎓","👑","🎎","🎏","🎐","🎌","🏮","💍","❤️","💔","💌","💕","💞","💓","💗","💖","💘","💝","💟","💜","💛","💚","💙","🏃","🏃🏻","🏃🏼","🏃🏽","🏃🏾","🏃🏿","🚶","🚶🏻","🚶🏼","🚶🏽","🚶🏾","🚶🏿","💃","💃🏻","💃🏼","💃🏽","💃🏾","💃🏿","🚣","🚣🏻","🚣🏼","🚣🏽","🚣🏾","🚣🏿","🏊","🏊🏻","🏊🏼","🏊🏽","🏊🏾","🏊🏿","🏄","🏄🏻","🏄🏼","🏄🏽","🏄🏾","🏄🏿","🛀","🛀🏻","🛀🏼","🛀🏽","🛀🏾","🛀🏿","🏂","🎿","⛄️","🚴","🚴🏻","🚴🏼","🚴🏽","🚴🏾","🚴🏿","🚵","🚵🏻","🚵🏼","🚵🏽","🚵🏾","🚵🏿","🏇","🏇🏻","🏇🏼","🏇🏽","🏇🏾","🏇🏿","⛺️","🎣","⚽️","🏀","🏈","⚾️","🎾","🏉","⛳️","🏆","🎽","🏁","🎹","🎸","🎻","🎷","🎺","🎵","🎶","🎼","🎧","🎤","🎭","🎫","🎩","🎪","🎬","🎨","🎯","🎱","🎳","🎰","🎲","🎮","🎴","🃏","🀄️","🎠","🎡","🎢","🚃","🚞","🚂","🚋","🚝","🚄","🚅","🚆","🚇","🚈","🚉","🚊","🚌","🚍","🚎","🚐","🚑","🚒","🚓","🚔","🚨","🚕","🚖","🚗","🚘","🚙","🚚","🚛","🚜","🚲","🚏","⛽️","🚧","🚦","🚥","🚀","🚁","✈️","💺","⚓️","🚢","🚤","⛵️","🚡","🚠","🚟","🛂","🛃","🛄","🛅","💴","💶","💷","💵","🗽","🗿","🌁","🗼","⛲️","🏰","🏯","🌇","🌆","🌃","🌉","🏠","🏡","🏢","🏬","🏭","🏣","🏤","🏥","🏦","🏨","🏩","💒","⛪️","🏪","🏫","🇦🇺","🇦🇹","🇧🇪","🇧🇷","🇨🇦","🇨🇱","🇨🇳","🇨🇴","🇩🇰","🇫🇮","🇫🇷","🇩🇪","🇭🇰","🇮🇳","🇮🇩","🇮🇪","🇮🇱","🇮🇹","🇯🇵","🇰🇷","🇲🇴","🇲🇾","🇲🇽","🇳🇱","🇳🇿","🇳🇴","🇵🇭","🇵🇱","🇵🇹","🇵🇷","🇷🇺","🇸🇦","🇸🇬","🇿🇦","🇪🇸","🇸🇪","🇨🇭","🇹🇷","🇬🇧","🇺🇸","🇦🇪","🇻🇳","⌚️","📱","📲","💻","⏰","⏳","⌛️","📷","📹","🎥","📺","📻","📟","📞","☎️","📠","💽","💾","💿","📀","📼","🔋","🔌","💡","🔦","📡","💳","💸","💰","💎","🌂","👝","👛","👜","💼","🎒","💄","👓","👒","👡","👠","👢","👞","👟","👙","👗","👘","👚","👕","👔","👖","🚪","🚿","🛁","🚽","💈","💉","💊","🔬","🔭","🔮","🔧","🔪","🔩","🔨","💣","🚬","🔫","🔖","📰","🔑","✉️","📩","📨","📧","📥","📤","📦","📯","📮","📪","📫","📬","📭","📄","📃","📑","📈","📉","📊","📅","📆","🔅","🔆","📜","📋","📖","📓","📔","📒","📕","📗","📘","📙","📚","📇","🔗","📎","📌","✂️","📐","📍","📏","🚩","📁","📂","✒️","✏️","📝","🔏","🔐","🔒","🔓","📣","📢","🔈","🔉","🔊","🔇","💤","🔔","🔕","💭","💬","🚸","🔍","🔎","🚫","⛔️","📛","🚷","🚯","🚳","🚱","📵","🔞","🉑","🉐","💮","㊙️","㊗️","🈴","🈵","🈲","🈶","🈚️","🈸","🈺","🈷","🈹","🈳","🈂","🈁","🈯️","💹","❇️","✳️","❎","✅","✴️","📳","📴","🆚","🅰","🅱","🆎","🆑","🅾","🆘","🆔","🅿️","🚾","🆒","🆓","🆕","🆖","🆗","🆙","🏧","♈️","♉️","♊️","♋️","♌️","♍️","♎️","♏️","♐️","♑️","♒️","♓️","🚻","🚹","🚺","🚼","♿️","🚰","🚭","🚮","▶️","◀️","🔼","🔽","⏩","⏪","⏫","⏬","➡️","⬅️","⬆️","⬇️","↗️","↘️","↙️","↖️","↕️","↔️","🔄","↪️","↩️","⤴️","⤵️","🔀","🔁","🔂","#⃣","0⃣","1⃣","2⃣","3⃣","4⃣","5⃣","6⃣","7⃣","8⃣","9⃣","🔟","🔢","🔤","🔡","🔠","ℹ️","📶","🎦","🔣","➕","➖","〰","➗","✖️","✔️","🔃","™","©","®","💱","💲","➰","➿","〽️","❗️","❓","❕","❔","‼️","⁉️","❌","⭕️","💯","🔚","🔙","🔛","🔝","🔜","🌀","Ⓜ️","⛎","🔯","🔰","🔱","⚠️","♨️","♻️","💢","💠","♠️","♣️","♥️","♦️","☑️","⚪️","⚫️","🔘","🔴","🔵","🔺","🔻","🔸","🔹","🔶","🔷","▪️","▫️","⬛️","⬜️","◼️","◻️","◾️","◽️","🔲","🔳","🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛","🕜","🕝","🕞","🕟","🕠","🕡","🕢","🕣","🕤","🕥","🕦","🕧"]
 
-  console.log("sendEnteredMessage " + messageText);
+console.log("sendEnteredMessage "+ messageText);
 
-  if (previousMessageHash[recipientId] === 'send a message') {
-    sendTextMessage(2464058527010934, messageText); // send a message to Matthew directly
-  } else if (previousMessageHash[recipientId] === 'show on map') {
-    sendLocation(recipientId, messageText);
-  } else if (previousMessageHash[recipientId] === 'mylocation') {
-    sendLocation(recipientId, messageText);
-  } else if (previousMessageHash[recipientId] === 'getdirection') {
-    sendDirection(recipientId, messageText);
-  } else if (senderContext[recipientId].state === 'addKeywordButton') {
-    addKeywordButtonStep2(recipientId, messageText);
-  } else if (emojiString.indexOf(messageText.substring(0, 2)) > -1) {
-    var maxLength = emojiString.length;
-    var random = Math.floor(Math.random() * maxLength);
-    messageText = emojiString[random];
-    sendTextMessage(recipientId, messageText);
-  } else {
-    sendCustomMessage(recipientId, messageText);
-  }
+    if( previousMessageHash[recipientId] === 'send a message') {
+         sendTextMessage(1073962542672604, messageText); // send a message to Matthew directly
+    }
+    else if( senderContext[recipientId].state === 'addKeywordStep1') {
+         addKeywordStep2(recipientId,messageText);
+    }
+    else if( senderContext[recipientId].state === 'addKeywordText') {
+         addKeywordTextStep2(recipientId,messageText);
+    }
+    else if( senderContext[recipientId].state === 'addKeywordButton') {
+         addKeywordButtonStep2(recipientId,messageText);
+    }
+    else if (emojiString.indexOf(messageText.substring(0,2)) > -1) {
+         var maxLength = emojiString.length;
+         var random = Math.floor(Math.random() * maxLength);
+         messageText = emojiString[random];
+         sendTextMessage(recipientId,messageText);
+    }
+    else { 
+         sendCustomMessage(recipientId,messageText);
+   }
 }
 
-function sendCustomMessage(recipientId, messageText) {
+function sendCustomMessage(recipientId,messageText) {
 
-  console.log("sendCustoMessage " + messageText);
+console.log("sendCustoMessage "+ messageText);
 
-  switch (messageText.toLowerCase()) {
+    switch (messageText.toLowerCase()) {
 
-    case 'joke':
-      sendJoke(recipientId);
-      break
+      case 'joke':
+        sendJoke(recipientId);
+        break        
 
-    case 'image':
-      sendRandomImage(recipientId);
-      break
+      case 'image':
+        sendRandomImage(recipientId);
+        break        
 
-    case 'who':
-      sendLocale(recipientId);
-      break
+      case 'who':
+        sendLocale(recipientId);
+        break        
+      
+      case 'add keyword':
+        addKeywordStep1(recipientId);
+        break        
 
-    case 'select date and time':
-      sendDateSelection(recipientId);
-      break
+      case 'list keywords':
+        sendKeywordList(recipientId);
+        break        
 
-    case '10am':
-      var actualDate = "\n" + tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + " : " + days[tomorrow.getDay()]
-      sendDateReply(messageText, recipientId, firstName, actualDate);
-      sendAppointMessage(2464058527010934, messageText, recipientId, firstName, lastName, actualDate);
-      break
+      case 'addkeyword_text':
+        addKeywordText(recipientId);
+        break
 
-    case 'addkeyword_button1':
-      addKeywordButtonStep3(recipientId, 1);
-      break
+      case 'addkeyword_button':
+        addKeywordButton(recipientId);
+        break
 
-    case 'addkeyword_button2':
-      addKeywordButtonStep3(recipientId, 2);
-      break
+      case 'addkeyword_button1':
+        addKeywordButtonStep3(recipientId,1);
+        break
 
-    case 'addkeyword_button3':
-      addKeywordButtonStep3(recipientId, 3);
-      break
+      case 'addkeyword_button2':
+        addKeywordButtonStep3(recipientId,2);
+        break
+
+      case 'addkeyword_button3':
+        addKeywordButtonStep3(recipientId,3);
+        break
 
 
-    default:
-      sendJsonMessage(recipientId, messageText);
+      default:
+         sendJsonMessage(recipientId,messageText);
 
-  }
-  previousMessageHash[recipientId] = messageText.toLowerCase();
+    }
+    previousMessageHash[recipientId] = messageText.toLowerCase();
 }
 
-function sendJsonMessage(recipientId, keyword) {
-  console.log("sendJsonMessage " + keyword);
+function sendJsonMessage(recipientId,keyword) {
+console.log("sendJsonMessage " + keyword);
   if (_.has(scriptRules, keyword.toUpperCase())) {
-    sendSingleJsonMessage(recipientId, scriptRules[keyword.toUpperCase()]);
-  } else if (_.has(customRules, keyword.toUpperCase())) {
-    sendSingleJsonMessage(recipientId, customRules[keyword.toUpperCase()]);
-  } else {
-    sendSingleJsonMessage(recipientId, "HOME.json");
+      sendSingleJsonMessage(recipientId,scriptRules[keyword.toUpperCase()]);
+  }
+  else if (_.has(customRules, keyword.toUpperCase())) {
+      sendSingleJsonMessage(recipientId,customRules[keyword.toUpperCase()]);
+  }
+  else  {
+      sendSingleJsonMessage(recipientId,"HOME.json");
   }
 }
 
@@ -760,20 +659,6 @@ function sendTextMessage(recipientId, messageText) {
   callSendAPI(messageData);
 }
 
-function sendAppointMessage(ownId, messageText, recipientId, firstName, lastName, actualDate) {
-  var messageData = {
-    "recipient": {
-      "id": ownId
-    },
-    "message": {
-      "text": firstName + " " + lastName + " (" + recipientId + ")" + " has made an appointment at " + messageText + " on " + actualDate,
-      "metadata": "DEVELOPER_DEFINED_METADATA"
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
 /*
  * Send a Joke with Quick Reply buttons.
  *
@@ -782,10 +667,11 @@ function sendJoke(recipientId) {
 
   var jokeString = "";
 
-  while (jokeString === "") {
-    var random = Math.floor(Math.random() * jokes.length);
-    if (jokes[random].joke.length < 320) // better be a least one good joke :) 
-      jokeString = jokes[random].joke;
+  while( jokeString ===  "")
+  {
+      var random = Math.floor(Math.random() * jokes.length);
+      if(jokes[random].joke.length < 320)   // better be a least one good joke :) 
+          jokeString = jokes[random].joke;
   }
 
   var messageData = {
@@ -794,15 +680,16 @@ function sendJoke(recipientId) {
     },
     message: {
       text: jokeString,
-      quick_replies: [{
-          "content_type": "text",
-          "title": "Another 😂",
-          "payload": "joke"
+      quick_replies: [
+        {
+          "content_type":"text",
+          "title":"Another 😂",
+          "payload":"joke"
         },
         {
-          "content_type": "text",
-          "title": "Home",
-          "payload": "home"
+          "content_type":"text",
+          "title":"Home",
+          "payload":"home"
         }
       ]
     }
@@ -825,11 +712,13 @@ function sendLocale(recipientId) {
     },
     message: {
       text: nameString,
-      quick_replies: [{
-        "content_type": "text",
-        "title": "Home",
-        "payload": "home"
-      }]
+      quick_replies: [
+        {
+          "content_type":"text",
+          "title":"Home",
+          "payload":"home"
+        }
+      ]
     }
   };
 
@@ -841,7 +730,7 @@ function sendLocale(recipientId) {
  *
  */
 function sendRandomImage(recipientId) {
-  sendImageMessage(recipientId, "https://unsplash.it/400/600/?random");
+    sendImageMessage(recipientId,"https://unsplash.it/400/600/?random");
 }
 
 /*
@@ -859,7 +748,7 @@ function sendButtonMessage(recipientId) {
         payload: {
           template_type: "button",
           text: "This is test text",
-          buttons: [{
+          buttons:[{
             type: "web_url",
             url: "https://www.oculus.com/en-us/rift/",
             title: "Open Web URL"
@@ -875,7 +764,7 @@ function sendButtonMessage(recipientId) {
         }
       }
     }
-  };
+  };  
 
   callSendAPI(messageData);
 }
@@ -889,310 +778,112 @@ function sendGenericMessage(recipientId) {
     recipient: {
       id: recipientId
     },
-    message: {
+    message: 
+    {
       "attachment": {
         "type": "template",
         "payload": {
-          "template_type": "generic",
-          "elements": [{
-              "title": "Bots",
-              "subtitle": "The rise of the Facebook Bot!",
-              "item_url": "http://www.dynamic-memory.com/",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/robot.png",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "Make an Appointment",
-                  "payload": "appointment"
-                },
-                {
-                  "type": "postback",
-                  "title": "Your Business Bot",
-                  "payload": "business"
-                },
-                {
-                  "type": "postback",
-                  "title": "I want a Bot!",
-                  "payload": "I want one"
-                }
-              ]
+         "template_type": "generic",
+          "elements": [
+          {
+            "title": "Bots",
+            "subtitle": "The rise of the Facebook Bot!",
+            "item_url": "http://www.dynamic-memory.com/",               
+            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/robot.png",
+            "buttons": [
+            {
+              "type": "postback",
+              "title": "What is this Bot?",
+              "payload": "What is this Robot?"
             },
             {
-              "title": "DMS Software",
-              "subtitle": "Software Engineering is awesome",
-              "item_url": "http://www.dynamic-memory.com/",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/evolution.png",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "Contact",
-                  "payload": "Contact"
-                },
-                {
-                  "type": "postback",
-                  "title": "Social media",
-                  "payload": "Social media"
-                },
-                {
-                  "type": "postback",
-                  "title": "Matthew's bio",
-                  "payload": "bio"
-                }
-              ]
+              "type": "postback",
+              "title": "Your Business Bot",
+              "payload": "business"
             },
             {
-              "title": "Custom Examples",
-              "subtitle": "A few small apps to give an idea of the possibilites",
-              "item_url": "https://dynamic-memory.com",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/danger-man-at-work-hi.png",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "Tell me a joke 😜",
-                  "payload": "joke"
-                },
-                {
-                  "type": "postback",
-                  "title": "Random Image",
-                  "payload": "image"
-                },
-                {
-                  "type": "postback",
-                  "title": "Who am I?",
-                  "payload": "who"
-                }
-              ]
-            },
-            {
-              "title": "Bot Examples",
-              "subtitle": "Some great bots",
-              "item_url": "https://developers.facebook.com/products/messenger/",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/example.jpeg",
-              "buttons": [{
-                  "type": "web_url",
-                  "url": "https://www.messenger.com/t/HealthTap",
-                  "title": "Health Tap"
-                },
-                {
-                  "type": "web_url",
-                  "url": "http://www.messenger.com/t/EstherBot",
-                  "title": "Esther's cool bot"
-                },
-                {
-                  "type": "web_url",
-                  "url": "http://www.messenger.com/t/techcrunch",
-                  "title": "TechCrunch news bot"
-                }
-              ]
+              "type": "postback",
+              "title": "I want a Bot!",
+              "payload": "I want one"
             }
-          ]
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-function sendDateSelection(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-              "title": tomorrow.getDate() + "/" + tomorrow.getMonth() + "/" + tomorrow.getFullYear() + "\n" + days[tomorrow.getDay()],
-              "subtitle": "Select timeslot",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "10:00",
-                  "payload": "10am"
-                },
-                {
-                  "type": "postback",
-                  "title": "13:00",
-                  "payload": "appreplytwo"
-                },
-                {
-                  "type": "postback",
-                  "title": "16:00",
-                  "payload": "appreplythree"
-                }
-              ]
-            },
-            {
-              "title": third.getDate() + "/" + third.getMonth() + "/" + third.getFullYear() + "\n" + days[third.getDay()],
-              "subtitle": "Select your desired timeslot",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "10:00",
-                  "payload": "appreply"
-                },
-                {
-                  "type": "postback",
-                  "title": "13:00",
-                  "payload": "appreply"
-                },
-                {
-                  "type": "postback",
-                  "title": "16:00",
-                  "payload": "appreply"
-                }
-              ]
-            },
-            {
-              "title": fourth.getDate() + "/" + fourth.getMonth() + "/" + fourth.getFullYear() + "\n" + days[fourth.getDay()],
-              "subtitle": "Select your desired timeslot",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "10:00",
-                  "payload": "appreply"
-                },
-                {
-                  "type": "postback",
-                  "title": "13:00",
-                  "payload": "appreply"
-                },
-                {
-                  "type": "postback",
-                  "title": "16:00",
-                  "payload": "appreply"
-                }
-              ]
-            },
-            {
-              "title": fifth.getDate() + "/" + fifth.getMonth() + "/" + fifth.getFullYear() + "\n" + days[fifth.getDay()],
-              "subtitle": "Select your desired timeslot",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "10:00",
-                  "payload": "appreply"
-                },
-                {
-                  "type": "postback",
-                  "title": "13:00",
-                  "payload": "appreply"
-                },
-                {
-                  "type": "postback",
-                  "title": "16:00",
-                  "payload": "appreply"
-                }
-              ]
-            },
-            {
-              "title": sixth.getDate() + "/" + sixth.getMonth() + "/" + sixth.getFullYear() + "\n" + days[sixth.getDay()],
-              "subtitle": "Select your desired timeslot",
-              "buttons": [{
-                  "type": "postback",
-                  "title": "10:00",
-                  "payload": "appointment"
-                },
-                {
-                  "type": "postback",
-                  "title": "13:00",
-                  "payload": "business"
-                },
-                {
-                  "type": "postback",
-                  "title": "16:00",
-                  "payload": "I want one"
-                }
-              ]
-            }
-          ]
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-function sendLocation(recipientId, messageText) {
-
-  // for distance (returns JSON containing values for distance[m] and time[s])
-  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key= API_KEY
-  // for directions
-  // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
-
-  address = messageText.replace(/ /g, "-");
-
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": messageText,
-            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Clabel:Y%7C" + address + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
-            "buttons": [{
-                "type": "web_url",
-                "url": "http://maps.apple.com/maps?q=" + address,
-                "title": "View on Maps",
-                "webview_height_ratio": "tall"
-              },
-              {
-                "type": "postback",
-                "title": "Another one",
-                "payload": "show on map"
-              },
-              {
-                "type": "postback",
-                "title": "Directions",
-                "payload": "getdirection"
-              }
             ]
-          }]
+          }, 
+          {
+            "title": "DMS Software",
+            "subtitle": "Software Engineering is awesome",
+            "item_url": "http://www.dynamic-memory.com/",               
+            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/evolution.png",
+            "buttons": [
+            {
+              "type": "postback",
+              "title": "Contact",
+              "payload": "Contact"
+            }, 
+            {
+              "type": "postback",
+              "title": "Social media",
+              "payload": "Social media"
+            },
+            {
+              "type": "postback",
+              "title": "Matthew's bio",
+              "payload": "bio"
+            }
+            ]
+          }, 
+          { 
+            "title": "Custom Examples",
+            "subtitle": "A few small apps to give an idea of the possibilites",
+            "item_url": "https://dynamic-memory.com",
+            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/danger-man-at-work-hi.png",
+            "buttons": [
+            {
+              "type": "postback",
+              "title": "Tell me a joke 😜",
+              "payload": "joke"
+            },
+            {
+              "type": "postback",
+              "title": "Random Image",
+              "payload": "image"
+            },
+            {
+              "type": "postback",
+              "title": "Who am I?",
+              "payload": "who"
+            }
+            ]
+          },
+          { 
+            "title": "Bot Examples",
+            "subtitle": "Some great bots",
+            "item_url": "https://developers.facebook.com/products/messenger/",
+            "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/example.jpeg",
+            "buttons": [
+            {
+              "type": "web_url",
+              "url": "https://www.messenger.com/t/HealthTap",
+              "title": "Health Tap"
+            },
+            {
+              "type": "web_url",
+              "url": "http://www.messenger.com/t/EstherBot",
+              "title": "Esther's cool bot"
+            },
+            {
+              "type": "web_url",
+              "url": "http://www.messenger.com/t/techcrunch",
+              "title": "TechCrunch news bot"
+            }
+            ]
+          }
+          ]
         }
       }
     }
-  };
+  };  
 
   callSendAPI(messageData);
-}
-
-function sendDirection(recipientId, messageText) {
-
-  var current = messageText.replace(/ /g, "-");
-
-  var uri = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" + current + "&destinations=" + address + "&key=" + GOOGLEMAPS_API;
-  console.log(uri)
-
-  request(uri, { json: true }, (err, res, body) => {
-    if (err) { return console.log(err); }
-    var distance = (body.rows[0].elements[0].distance.value)/1000;
-    var time = body.rows[0].elements[0].duration.text
-
-    var messageData = {
-      recipient: {
-        id: recipientId
-      },
-      message: {
-        "attachment": {
-          "type": "template",
-          "payload": {
-            "template_type": "button",
-            "text": "From: " + body.origin_addresses + "\nTo: " + body.destination_addresses + "\nTravel distance: " + distance + " km" + "\nTravel time: " + time,
-            "buttons": [{
-              "type": "web_url",
-              "url": "https://www.google.com.my/maps/dir/" + address + "/" + current,
-              "title": "View on Map",
-              "webview_height_ratio": "tall"
-            }]
-          }
-        }
-      }
-    };
-  
-    callSendAPI(messageData);
-  });
-
 }
 
 /*
@@ -1201,13 +892,13 @@ function sendDirection(recipientId, messageText) {
  */
 function sendReceiptMessage(recipientId) {
   // Generate a random receipt ID as the API requires a unique ID
-  var receiptId = "order" + Math.floor(Math.random() * 1000);
+  var receiptId = "order" + Math.floor(Math.random()*1000);
 
   var messageData = {
     recipient: {
       id: recipientId
     },
-    message: {
+    message:{
       attachment: {
         type: "template",
         payload: {
@@ -1215,8 +906,8 @@ function sendReceiptMessage(recipientId) {
           recipient_name: "Peter Chang",
           order_number: receiptId,
           currency: "USD",
-          payment_method: "Visa 1234",
-          timestamp: "1428444852",
+          payment_method: "Visa 1234",        
+          timestamp: "1428444852", 
           elements: [{
             title: "Oculus Rift",
             subtitle: "Includes: headset, sensor, remote",
@@ -1272,59 +963,26 @@ function sendQuickReply(recipientId) {
     },
     message: {
       text: "Some regular buttons and a location test",
-      quick_replies: [{
-          "content_type": "text",
-          "title": "Action",
-          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
+      metadata: "DEVELOPER_DEFINED_METADATA",
+      quick_replies: [
+        {
+          "content_type":"text",
+          "title":"Action",
+          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
         },
         {
-          "content_type": "text",
-          "title": "Something else",
-          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_SOMETHING"
+          "content_type":"text",
+          "title":"Something else",
+          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_SOMETHING"
         },
         {
-          "content_type": "location",
-          "title": "Send Location",
-          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_LOCATION"
+          "content_type":"location",
+          "title":"Send Location",
+          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_LOCATION"
         }
       ]
     }
   };
-
-  callSendAPI(messageData);
-}
-
-function sendDateReply(messageText, recipientId, firstName, actualDate) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: "Thank you, " + firstName + ". You have succesfully made an appointment at " + messageText + " on " + actualDate,
-      metadata: "DEVELOPER_DEFINED_METADATA",
-    }
-  };
-
-  MongoClient.connect(url, function (err, db) {
-    if (err) {
-      console.log('Unable to connect to the mongoDB server. Error:', err);
-    } else {
-      console.log('Connection established to', url);
-
-      // do some work here with the database.
-      var dbo = db.db("heroku_rvfs2pvf");
-
-      dbo.collection("users_table").insertOne(messageData, function (err, res) {
-        if (err) {
-          console.log('Unable to insert user: ', err);
-        } else {
-          console.log('Successfully inserted user', url);
-          //Close connection
-          db.close();
-        }
-      });
-    }
-  });
 
   callSendAPI(messageData);
 }
@@ -1389,9 +1047,7 @@ function sendTypingOff(recipientId) {
 function callSendAPI(messageData) {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: {
-      access_token: PAGE_ACCESS_TOKEN
-    },
+    qs: { access_token: PAGE_ACCESS_TOKEN },
     method: 'POST',
     json: messageData
 
@@ -1401,16 +1057,16 @@ function callSendAPI(messageData) {
       var messageId = body.message_id;
 
       if (messageId) {
-        console.log("Successfully sent message with id %s to recipient %s",
+        console.log("Successfully sent message with id %s to recipient %s", 
           messageId, recipientId);
       } else {
-        console.log("Successfully called Send API for recipient %s",
-          recipientId);
+      console.log("Successfully called Send API for recipient %s", 
+        recipientId);
       }
     } else {
       console.error("Unable to send message. :" + response.error);
     }
-  });
+  });  
 }
 
 /*
@@ -1419,286 +1075,289 @@ function callSendAPI(messageData) {
  *
  */
 function callGetLocaleAPI(event, handleReceived) {
-  var userID = event.sender.id;
-  var http = require('https');
-  var path = '/v2.6/' + userID + '?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=' + PAGE_ACCESS_TOKEN;
-  var options = {
-    host: 'graph.facebook.com',
-    path: path
-  };
+    var userID = event.sender.id;
+    var http = require('https');
+    var path = '/v2.6/' + userID +'?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=' + PAGE_ACCESS_TOKEN;
+    var options = {
+      host: 'graph.facebook.com',
+      path: path
+    };
+    
+    if(senderContext[userID])
+    {
+       firstName = senderContext[userID].firstName; 
+       lastName = senderContext[userID].lastName; 
+       console.log("found " + JSON.stringify(senderContext[userID]));
+       if(!firstName) 
+          firstName = "undefined";
+       if(!lastName) 
+          lastName = "undefined";
+       handleReceived(event);
+       return;
+    }
 
-  if (senderContext[userID]) {
-    firstName = senderContext[userID].firstName;
-    lastName = senderContext[userID].lastName;
-    console.log("found " + JSON.stringify(senderContext[userID]));
-    if (!firstName)
-      firstName = "undefined";
-    if (!lastName)
-      lastName = "undefined";
-    handleReceived(event);
-    return;
-  }
+    var req = http.get(options, function(res) {
+      //console.log('STATUS: ' + res.statusCode);
+      //console.log('HEADERS: ' + JSON.stringify(res.headers));
 
-  var req = http.get(options, function (res) {
-    //console.log('STATUS: ' + res.statusCode);
-    //console.log('HEADERS: ' + JSON.stringify(res.headers));
-
-    // Buffer the body entirely for processing as a whole.
-    var bodyChunks = [];
-    res.on('data', function (chunk) {
-      // You can process streamed parts here...
-      bodyChunks.push(chunk);
-    }).on('end', function () {
-      var body = Buffer.concat(bodyChunks);
-      var bodyObject = JSON.parse(body);
-      firstName = bodyObject.first_name;
-      lastName = bodyObject.last_name;
-      if (!firstName)
-        firstName = "undefined";
-      if (!lastName)
-        lastName = "undefined";
-      senderContext[userID] = {};
-      senderContext[userID].firstName = firstName;
-      senderContext[userID].lastName = lastName;
-      console.log("defined " + JSON.stringify(senderContext));
-      handleReceived(event);
-    })
-  });
-  req.on('error', function (e) {
-    console.log('ERROR: ' + e.message);
-  });
+      // Buffer the body entirely for processing as a whole.
+      var bodyChunks = [];
+      res.on('data', function(chunk) {
+        // You can process streamed parts here...
+        bodyChunks.push(chunk);
+      }).on('end', function() {
+        var body = Buffer.concat(bodyChunks);
+        var bodyObject = JSON.parse(body);
+        firstName = bodyObject.first_name;
+        lastName = bodyObject.last_name;
+        if(!firstName) 
+          firstName = "undefined";
+        if(!lastName) 
+          lastName = "undefined";
+        senderContext[userID] = {};
+        senderContext[userID].firstName = firstName;
+        senderContext[userID].lastName = lastName;
+        console.log("defined " + JSON.stringify(senderContext));
+        handleReceived(event);
+      })
+    });
+    req.on('error', function(e) {
+      console.log('ERROR: ' + e.message);
+    });
 }
 
-function setupGetStartedButton() {
 
-  request({
+function addPersistentMenu(){
+ request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-    qs: {
-      access_token: PAGE_ACCESS_TOKEN
-    },
+    qs: { access_token: PAGE_ACCESS_TOKEN },
     method: 'POST',
-    json: {
-      "get_started": {
-        "payload": "GET_STARTED_PAYLOAD"
-      }
-    }
-  }, function (error, response, body) {
+    json:{
+  "get_started":{
+    "payload":"GET_STARTED_PAYLOAD"
+   }
+ }
+}, function(error, response, body) {
     console.log("Add persistent menu " + response)
     if (error) {
-      console.log('Error sending messages: ', error)
+        console.log('Error sending messages: ', error)
     } else if (response.body.error) {
-      console.log('Error: ', response.body.error)
+        console.log('Error: ', response.body.error)
     }
-  })
-  request({
+})
+ request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-    qs: {
-      access_token: PAGE_ACCESS_TOKEN
-    },
+    qs: { access_token: PAGE_ACCESS_TOKEN },
     method: 'POST',
-    json: {
-      "greeting": [{
-        "locale": "default",
-        "text": "Greeting text for default local !"
-      }, {
-        "locale": "en_US",
-        "text": "LETS GET IT ON THE WAY ROLLING TWICE!"
-      }]
-    }
-  }, function (error, response, body) {
-    console.log("Add persistent menu " + response)
-    if (error) {
-      console.log('Error sending messages: ', error)
-    } else if (response.body.error) {
-      console.log('Error: ', response.body.error)
-    }
-  })
-}
-
-function AddPersistentMenu() {
-  request({
-    url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-    qs: {
-      access_token: PAGE_ACCESS_TOKEN
-    },
-    method: 'POST',
-    json: {
-      "persistent_menu": [{
-          "locale": "default",
-          "composer_input_disabled": false,
-          "call_to_actions": [{
-              "title": "Home",
-              "type": "postback",
-              "payload": "HOME"
+    json:{
+"persistent_menu":[
+    {
+      "locale":"default",
+      "composer_input_disabled":true,
+      "call_to_actions":[
+        {
+          "title":"Home",
+          "type":"postback",
+          "payload":"HOME"
+        },
+        {
+          "title":"Nested Menu Example",
+          "type":"nested",
+          "call_to_actions":[
+            {
+              "title":"Who am I",
+              "type":"postback",
+              "payload":"WHO"
             },
             {
-              "title": "Nested Menu Example",
-              "type": "nested",
-              "call_to_actions": [{
-                  "title": "Who am I",
-                  "type": "postback",
-                  "payload": "WHO"
-                },
-                {
-                  "title": "Joke",
-                  "type": "postback",
-                  "payload": "joke"
-                },
-                {
-                  "title": "Technical",
-                  "type": "postback",
-                  "payload": "technical"
-                }
-              ]
+              "title":"Joke",
+              "type":"postback",
+              "payload":"joke"
             },
             {
-              "type": "web_url",
-              "title": "Latest News",
-              "url": "http://foxnews.com",
-              "webview_height_ratio": "full"
+              "title":"Contact Info",
+              "type":"postback",
+              "payload":"CONTACT"
             }
           ]
         },
         {
-          "locale": "zh_CN",
-          "composer_input_disabled": false
+          "type":"web_url",
+          "title":"Latest News",
+          "url":"http://foxnews.com",
+          "webview_height_ratio":"full"
         }
       ]
-    }
-
-  }, function (error, response, body) {
-    console.log(response)
-    if (error) {
-      console.log('Error sending messages: ', error)
-    } else if (response.body.error) {
-      console.log('Error: ', response.body.error)
-    }
-  })
-}
-
-/* function removePersistentMenu() {
-  request({
-    url: 'https://graph.facebook.com/v2.6/me/thread_settings',
-    qs: {
-      access_token: PAGE_ACCESS_TOKEN
     },
-    method: 'POST',
-    json: {
-      setting_type: "call_to_actions",
-      thread_state: "existing_thread",
-      call_to_actions: []
+    {
+      "locale":"zh_CN",
+      "composer_input_disabled":false
+    }
+    ]
     }
 
-  }, function (error, response, body) {
+}, function(error, response, body) {
     console.log(response)
     if (error) {
-      console.log('Error sending messages: ', error)
+        console.log('Error sending messages: ', error)
     } else if (response.body.error) {
-      console.log('Error: ', response.body.error)
+        console.log('Error: ', response.body.error)
     }
-  })
-} */
+})
 
-function addKeywordStep1(recipientId) {
-  sendTextMessage(recipientId, "The keyword will drive the actions by the Bot.  The user can type in the keyword or it can be triggered by a link.  The keyword can contain letters, numbers and spaces. Please type in the keyword:");
-  senderContext[recipientId].state = "addKeywordStep1";
 }
 
-function addKeywordStep2(recipientId, messageText) {
-  senderContext[recipientId].keyword = messageText;
-  senderContext[recipientId].state = "addKeywordStep2";
-  sendJsonMessage(recipientId, "addKeywordStep2");
-}
-
-function stateMachineError(recipientId) {
-  sendTextMessage(recipientId, "Sorry the Bot is confused.  We will have to start again.");
-  senderContext[recipientId].state = "";
-  senderContext[recipientId].keyword = "";
-}
-
-function addKeywordText(recipientId) {
-  console.log("addKeywordText " + JSON.stringify(senderContext));
-
-  if (senderContext[recipientId].state === "addKeywordStep2") {
-    sendTextMessage(recipientId, "Please type in the text to be sent to the user when this keyword is used.");
-    senderContext[recipientId].state = "addKeywordText";
-  } else {
-    stateMachineError(recipientId);
-  }
-}
-
-function addKeywordTextStep2(recipientId, messageText) {
-  if (senderContext[recipientId].state === "addKeywordText") {
-    var filename = senderContext[recipientId].keyword.toUpperCase() + ".json";
-    var contents = '{"text": "' + messageText + '" }';
-    console.log("contents: " + contents);
-    fs.writeFile("script/" + filename, contents, function (err) {
-      if (err) {
-        return console.log(err);
-      }
-      console.log("The file was saved!");
-      senderContext[recipientId].state = "";
-      customRules[senderContext[recipientId].keyword.toUpperCase()] = senderContext[recipientId].keyword.toUpperCase();
-      sendTextMessage(recipientId, "The keyword has been added.  Please type in the keyword to see the response.");
-
-      /*
-      fs.readFile(filename, function read(err, data) {
-          if (err) {
-              throw err;
-          }
-
-          // Invoke the next step here however you like
-          console.log("file contains: " + data);  
-      });
-      */
-    });
-  } else {
-    stateMachineError(recipientId);
-  }
-}
-
-function addKeywordButton(recipientId) {
-  console.log("addKeywordButton " + JSON.stringify(senderContext));
-
-  if (senderContext[recipientId].state === "addKeywordStep2") {
-    sendTextMessage(recipientId, "Please type in the title for the button.");
-    senderContext[recipientId].state = "addKeywordButton";
-  } else {
-    stateMachineError(recipientId);
-  }
-}
-
-function addKeywordButtonStep2(recipientId, messageText) {
-  if (senderContext[recipientId].state === "addKeywordButton") {
-    senderContext[recipientId].state = "addKeywordButtonStep2";
-    sendSingleJsonMessage(recipientId, "ADDKEYWORD_BUTTONSTEP2.json");
-  } else {
-    stateMachineError(recipientId);
-  }
-}
-
-function addKeywordButtonStep3(recipientId, buttonCount) {
-  if (senderContext[recipientId].state === "addKeywordButtonStep2") {
-    senderContext[recipientId].state = "addKeywordButtonStep3";
-    senderContext[recipientId].buttonCount = buttonCount;
-    sendSingleJsonMessage(recipientId, "ADDKEYWORD_BUTTONSTEP3.json");
-  } else {
-    stateMachineError(recipientId);
-  }
-}
-
-function sendKeywordList(recipientId) {
-  //  if (customRules.length > 0) 
-  if (1) {
-    var keys = Object.keys(customRules);
-
-    for (var p in keys) {
-      if (keys.hasOwnProperty(p)) {
-        sendTextMessage(recipientId, keys[p]);
-      }
+function removePersistentMenu(){
+ request({
+    url: 'https://graph.facebook.com/v2.6/me/thread_settings',
+    qs: { access_token: PAGE_ACCESS_TOKEN },
+    method: 'POST',
+    json:{
+        setting_type : "call_to_actions",
+        thread_state : "existing_thread",
+        call_to_actions:[ ]
     }
-  } else {
-    sendTextMessage(recipientId, "No custom keywords defined yet");
+
+}, function(error, response, body) {
+    console.log(response)
+    if (error) {
+        console.log('Error sending messages: ', error)
+    } else if (response.body.error) {
+        console.log('Error: ', response.body.error)
+    }
+})
+}
+
+function addKeywordStep1(recipientId)
+{
+   sendTextMessage(recipientId,"The keyword will drive the actions by the Bot.  The user can type in the keyword or it can be triggered by a link.  The keyword can contain letters, numbers and spaces. Please type in the keyword:");
+   senderContext[recipientId].state = "addKeywordStep1";
+}
+
+function addKeywordStep2(recipientId, messageText)
+{
+   senderContext[recipientId].keyword = messageText;
+   senderContext[recipientId].state = "addKeywordStep2";
+   sendJsonMessage(recipientId,"addKeywordStep2");
+}
+
+function stateMachineError(recipientId)
+{
+   sendTextMessage(recipientId,"Sorry the Bot is confused.  We will have to start again.");
+   senderContext[recipientId].state = "";
+   senderContext[recipientId].keyword = "";
+}
+
+function addKeywordText(recipientId)
+{
+   console.log("addKeywordText " + JSON.stringify(senderContext));
+
+   if( senderContext[recipientId].state === "addKeywordStep2")
+   {
+       sendTextMessage(recipientId,"Please type in the text to be sent to the user when this keyword is used.");
+       senderContext[recipientId].state = "addKeywordText";
+   }
+   else
+   {
+       stateMachineError(recipientId);
+   }
+}
+
+function addKeywordTextStep2(recipientId,messageText)
+{
+   if( senderContext[recipientId].state === "addKeywordText")
+   {
+      var filename = senderContext[recipientId].keyword.toUpperCase()+ ".json";
+      var contents = '{"text": "' + messageText + '" }';
+      console.log("contents: "+contents);
+      fs.writeFile("script/"+filename, contents, function(err) {
+           if(err) {
+               return console.log(err);
+           }
+           console.log("The file was saved!");
+           senderContext[recipientId].state = "";
+           customRules[senderContext[recipientId].keyword.toUpperCase()] = senderContext[recipientId].keyword.toUpperCase();
+           sendTextMessage(recipientId,"The keyword has been added.  Please type in the keyword to see the response.");
+
+/*
+fs.readFile(filename, function read(err, data) {
+    if (err) {
+        throw err;
+    }
+
+    // Invoke the next step here however you like
+    console.log("file contains: " + data);  
+});
+*/
+        }
+     ); 
+   }
+   else
+   {
+       stateMachineError(recipientId);
+   }
+}
+
+function addKeywordButton(recipientId)
+{
+   console.log("addKeywordButton " + JSON.stringify(senderContext));
+
+   if( senderContext[recipientId].state === "addKeywordStep2")
+   {
+       sendTextMessage(recipientId,"Please type in the title for the button.");
+       senderContext[recipientId].state = "addKeywordButton";
+   }
+   else
+   {
+       stateMachineError(recipientId);
+   }
+}
+
+function addKeywordButtonStep2(recipientId, messageText)
+{
+   if( senderContext[recipientId].state === "addKeywordButton")
+   {
+       senderContext[recipientId].state = "addKeywordButtonStep2";
+       sendSingleJsonMessage(recipientId,"ADDKEYWORD_BUTTONSTEP2.json");
+   }
+   else
+   {
+       stateMachineError(recipientId);
+   }
+}
+
+function addKeywordButtonStep3(recipientId, buttonCount)
+{
+   if( senderContext[recipientId].state === "addKeywordButtonStep2")
+   {
+       senderContext[recipientId].state = "addKeywordButtonStep3";
+       senderContext[recipientId].buttonCount = buttonCount;
+       sendSingleJsonMessage(recipientId,"ADDKEYWORD_BUTTONSTEP3.json");
+   }
+   else
+   {
+       stateMachineError(recipientId);
+   }
+}
+
+function sendKeywordList(recipientId)
+{
+//  if (customRules.length > 0) 
+  if (1)
+  {
+      var keys = Object.keys(customRules);
+
+      for (var p in keys) 
+      {
+         if (keys.hasOwnProperty(p))
+         {
+            sendTextMessage(recipientId,keys[p]);
+         }
+      }
+  } 
+  else
+  {
+    sendTextMessage(recipientId,"No custom keywords defined yet");
   }
   return;
 }
@@ -1707,8 +1366,9 @@ function sendKeywordList(recipientId) {
 // Start server
 // Webhooks must be available via SSL with a certificate signed by a valid 
 // certificate authority.
-app.listen(app.get('port'), function () {
+app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
 module.exports = app;
+
