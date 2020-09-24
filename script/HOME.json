@@ -26,28 +26,6 @@
           ]
         },
         {
-          "title": "DMS Software",
-          "subtitle": "Software Engineering is awesome",
-          "item_url": "http://www.dynamic-memory.com/",
-          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/home.png",
-          "buttons": [{
-              "type": "postback",
-              "title": "Contact",
-              "payload": "Contact"
-            },
-            {
-              "type": "postback",
-              "title": "Social media",
-              "payload": "Social media"
-            },
-            {
-              "type": "postback",
-              "title": "Matthew's bio",
-              "payload": "bio"
-            }
-          ]
-        },
-        {
           "title": "Custom Examples",
           "subtitle": "A few small apps to give an idea of the possibilites",
           "item_url": "https://dynamic-memory.com",
@@ -66,6 +44,29 @@
               "type": "postback",
               "title": "Who am I?",
               "payload": "who"
+            }
+          ]
+        },
+        {
+          "title": "Reach Out to Us",
+          "subtitle": "Find out more about us through a few available channels.",
+          "item_url": "https://www.pheebrothers.com/contact-us",
+          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/home.png",
+          "buttons": [{
+              "type": "postback",
+              "title": "Contacts",
+              "payload": "Contact"
+            },
+            {
+              "type": "web_url",
+              "title": "Instagram",
+              "url": "https://www.instagram.com/pheebrothers/"
+            },
+            {
+              "type": "web_url",
+              "title": "Website",
+              "url": "https://pheebrothers.com/",
+              "webview_height_ratio": "full"
             }
           ]
         }

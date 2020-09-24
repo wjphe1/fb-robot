@@ -5,52 +5,52 @@
             "template_type": "generic",
             "elements": [{
                 "title": "Fruit Jams",
-                "subtitle": "Jam processed using freshly picked fruits that gives an amazing juicy and fruity experience.",
+                "subtitle": "Processed using freshly picked fruits that gives an amazing juicy and fruity experience.",
                 "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/1.jpg",
                 "buttons": [{
                     "type": "web_url",
                     "title": "Learn More",
-                    "url": "http://pheebrothers.com/jam",
+                    "url": "https://pheebrothers.com/jam",
                     "webview_height_ratio": "full"
                 }]
             },{
                 "title": "Kaya Spread",
-                "subtitle": "Kaya is also known as Coconut Jam is one of Malaysia's signature food, made with traditional homemade secret.",
+                "subtitle": "Also known as Coconut Jam is one of Malaysia's signature food, made with traditional homemade secret.",
                 "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/2.jpg",
                 "buttons": [{
                     "type": "web_url",
                     "title": "Learn More",
-                    "url": "http://pheebrothers.com/kaya",
+                    "url": "https://pheebrothers.com/kaya",
                     "webview_height_ratio": "full"
                 }]
             },{
                 "title": "Baking Jams",
-                "subtitle": "Baking jams are jams specially customised for oven baking of biscuits, cookies and other bakery products.",
+                "subtitle": "Jams specially customised for oven baking of biscuits, cookies and other bakery products.",
                 "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/3.jpg",
                 "buttons": [{
                     "type": "web_url",
                     "title": "Learn More",
-                    "url": "http://pheebrothers.com/baking-jam",
+                    "url": "https://pheebrothers.com/baking-jam",
                     "webview_height_ratio": "full"
                 }]
             },{
                 "title": "Chocolate Products",
-                "subtitle": "There are several types of chocolate products available such as Bread Chocolate Filling/Spreading and Cookie Chocolate Filling.",
+                "subtitle": "Such as Bread Chocolate Filling/Spreading and Cookie Chocolate Filling.",
                 "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/4.jpg",
                 "buttons": [{
                     "type": "web_url",
                     "title": "Learn More",
-                    "url": "http://pheebrothers.com/chocolate-products",
+                    "url": "https://pheebrothers.com/chocolate-products",
                     "webview_height_ratio": "full"
                 }]
             },{
                 "title": "Peanut Butter",
-                "subtitle": "We produce peanut butter spread with selected quality roasted peanuts in creamy and crunchy textures.",
+                "subtitle": "Peanut butter spread with selected quality roasted peanuts in creamy and crunchy textures.",
                 "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/5.jpg",
                 "buttons": [{
                     "type": "web_url",
                     "title": "Learn More",
-                    "url": "http://pheebrothers.com/peanut-butter",
+                    "url": "https://pheebrothers.com/peanut-butter",
                     "webview_height_ratio": "full"
                 }]
             },{
@@ -60,7 +60,7 @@
                 "buttons": [{
                     "type": "web_url",
                     "title": "Learn More",
-                    "url": "http://pheebrothers.com/pastry-ingredient",
+                    "url": "https://pheebrothers.com/pastry-ingredient",
                     "webview_height_ratio": "full"
                 }]
             }]

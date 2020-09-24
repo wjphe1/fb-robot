@@ -357,7 +357,7 @@ function handleReceivedMessage(event) {
     // keywords and send back the corresponding example. Otherwise, just echo
     // the text we received.
     switch (messageText.toLowerCase()) {
-      case 'image':
+      /* case 'image':
         sendImageMessage(senderID, "http://messengerdemo.parseapp.com/img/rift.png");
         break;
 
@@ -410,12 +410,13 @@ function handleReceivedMessage(event) {
           sendTextMessage(senderID, firstName);
         break
 
-        /* case 'add menu':
-          addPersistentMenu();
-          break
-        case 'remove menu':
-          removePersistentMenu();
-          break */
+      case 'add menu':
+        addPersistentMenu();
+        break
+
+      case 'remove menu':
+        removePersistentMenu();
+        break
 
       case 'stop': // Stop the Bot from responding if the admin sends this messages
         if (senderID == 2464058527010934) {
@@ -429,11 +430,10 @@ function handleReceivedMessage(event) {
           console.log("Starting bot");
           isStopped = false;
         }
-        break
+        break */
 
       default:
         sendEnteredMessage(senderID, messageText);
-
     }
   } else if (messageAttachments) {
     if (messageAttachments[0].payload.url)
