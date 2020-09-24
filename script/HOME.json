@@ -51,7 +51,7 @@
           "title": "Reach Out to Us",
           "subtitle": "Find out more about us through a few available channels.",
           "item_url": "https://www.pheebrothers.com/contact-us",
-          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/home.png",
+          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/react_out.jpg",
           "buttons": [{
               "type": "postback",
               "title": "Contacts",
@@ -69,7 +69,28 @@
               "webview_height_ratio": "full"
             }
           ]
-        }
+        },
+        {
+          "title": "Fun area!",
+          "subtitle": "Check out some jokes, random images & question about yourself!",
+          "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/fun.jpg",
+          "buttons": [{
+              "type": "postback",
+              "title": "Tell me a joke 😜",
+              "payload": "joke"
+            },
+            {
+              "type": "postback",
+              "title": "Random Image",
+              "payload": "image"
+            },
+            {
+              "type": "postback",
+              "title": "Who am I?",
+              "payload": "who"
+            }
+          ]
+        },
       ]
     }
   }
