@@ -680,6 +680,7 @@ function sendJoke(recipientId) {
     },
     message: {
       text: jokeString,
+<<<<<<< HEAD
       quick_replies: [
         {
           "content_type":"text",
@@ -690,6 +691,12 @@ function sendJoke(recipientId) {
           "content_type":"text",
           "title":"Home",
           "payload":"home"
+=======
+      quick_replies: [{
+          "content_type": "text",
+          "title": "Another 😂",
+          "payload": "joke"
+>>>>>>> temp
         }
       ]
     }
@@ -1132,12 +1139,19 @@ function addPersistentMenu(){
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
     qs: { access_token: PAGE_ACCESS_TOKEN },
     method: 'POST',
-    json:{
-  "get_started":{
-    "payload":"GET_STARTED_PAYLOAD"
-   }
- }
-}, function(error, response, body) {
+    json: {
+      "greeting": [{
+        "locale": "default",
+        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
+      }, {
+        "locale": "en_US",
+        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
+      },{
+        "locale": "zh_CN",
+        "text": "你好！欢迎来到彭兄弟食品工业官方。有什么问题请随时联络我们。更多详情请前往官方网站 https://pheebrothers.com/ 。"
+      }]
+    }
+  }, function (error, response, body) {
     console.log("Add persistent menu " + response)
     if (error) {
         console.log('Error sending messages: ', error)
@@ -1170,14 +1184,10 @@ function addPersistentMenu(){
               "payload":"WHO"
             },
             {
-              "title":"Joke",
-              "type":"postback",
-              "payload":"joke"
-            },
-            {
-              "title":"Contact Info",
-              "type":"postback",
-              "payload":"CONTACT"
+              "type": "web_url",
+              "title": "View Website",
+              "url": "http://pheebrothers.com",
+              "webview_height_ratio": "tall"
             }
           ]
         },
@@ -1370,5 +1380,5 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
-module.exports = app;
+module.exports = app;rts = app;
 
