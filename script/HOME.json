@@ -5,25 +5,25 @@
          "template_type": "generic",
           "elements": [
           {
-            "title": "Bots",
-            "subtitle": "The rise of the Facebook Bot!",
-            "item_url": "http://www.dynamic-memory.com/",               
+            "title": "About Us",
+            "subtitle": "Phee Brothers Food Product",
+            "item_url": "https://www.pheebrothers.com/",               
             "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/robot.png",
             "buttons": [
             {
               "type": "postback",
-              "title": "What is this Bot?",
-              "payload": "What is this Robot?"
+              "title": "Who Are We?",
+              "payload": "Who Are We?"
             },
             {
               "type": "postback",
-              "title": "Your Business Bot",
-              "payload": "business"
+              "title": "What We Do?",
+              "payload": "Product Categories"
             },
             {
               "type": "postback",
-              "title": "I want a Bot!",
-              "payload": "I want one"
+              "title": "Delivery Coverage",
+              "payload": "Delivery Coverage"
             }
             ]
           }, 

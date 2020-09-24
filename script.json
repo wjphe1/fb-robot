@@ -1,6 +1,8 @@
 {
     "HOME" : "HOME.json",
-    "WHAT IS THIS ROBOT?" : "HELLO.json",
+    "WHO ARE WE?" : "HELLO.json",
+    "PRODUCT CATEGORIES" : "PRODUCT_CATEGORIES.json",
+    "DELIVERY COVERAGE" : "DELIVERY_COVERAGE.json",
     "HOW DOES IT WORK?" : "ROBOT.json",
     "I WANT ONE" : "I_WANT_ONE.json",
     "SOCIAL MEDIA" : "SOCIAL.json",

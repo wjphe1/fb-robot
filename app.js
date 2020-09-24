@@ -691,6 +691,10 @@ function sendCustomMessage(recipientId, messageText) {
       sendJoke(recipientId);
       break
 
+    case 'location':
+      sendLocation(recipientId);
+      break
+
     case 'image':
       sendRandomImage(recipientId);
       break
@@ -989,6 +993,42 @@ function sendGenericMessage(recipientId) {
   callSendAPI(messageData);
 }
 
+function sendLocation(recipientId) {
+
+  // for distance (returns JSON containing values for distance[m] and time[s])
+  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key= API_KEY
+  // for directions
+  // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
+
+
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      "attachment": {
+        "type": "template",
+        "payload": {
+          "template_type": "generic",
+          "elements": [{
+            "title": 'Phee Brothers Food Products Sdn Bhd',
+            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Cphee-brothers-food-product-sdn-bhd&maptype=roadmap&key=" + GOOGLEMAPS_API,
+            "buttons": [{
+                "type": "web_url",
+                "url": "http://maps.apple.com/maps?q=phee-brothers-food-product-sdn-bhd",
+                "title": "View on Maps",
+                "webview_height_ratio": "tall"
+              }
+            ]
+          }]
+        }
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
 function sendDateSelection(recipientId) {
   var messageData = {
     recipient: {
@@ -1100,53 +1140,6 @@ function sendDateSelection(recipientId) {
               ]
             }
           ]
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-function sendLocation(recipientId, messageText) {
-
-  // for distance (returns JSON containing values for distance[m] and time[s])
-  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Washington,DC&destinations=New+York+City,NY&key= API_KEY
-  // for directions
-  // https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood&key= API_KEY
-
-  address = messageText.replace(/ /g, "-");
-
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": messageText,
-            "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Clabel:Y%7C" + address + "&maptype=roadmap&key=" + GOOGLEMAPS_API,
-            "buttons": [{
-                "type": "web_url",
-                "url": "http://maps.apple.com/maps?q=" + address,
-                "title": "View on Maps",
-                "webview_height_ratio": "tall"
-              },
-              {
-                "type": "postback",
-                "title": "Another one",
-                "payload": "show on map"
-              },
-              {
-                "type": "postback",
-                "title": "Directions",
-                "payload": "getdirection"
-              }
-            ]
-          }]
         }
       }
     }
@@ -1519,7 +1512,7 @@ function AddPersistentMenu() {
               "type": "web_url",
               "title": "View Website",
               "url": "http://pheebrothers.com",
-              "webview_height_ratio": "tall"
+              "webview_height_ratio": "full"
             }
           ]
         },

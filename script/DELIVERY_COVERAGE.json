@@ -1,0 +1,10 @@
+{
+    "text": "We can deliver our products to you no matter where you at ALL AROUND THE WORLD! Our main production factory is based in Butterworth, Penang but rest assured, we are able to deliver your order as soon as possible including Sabah and Sarawak. However, the duration for shipment outside Malaysia may vary for different countries as the freight service takes time.",
+    "quick_replies": [
+        {
+            "content_type":"text",
+            "title":"Company Location",
+            "payload":"Location"
+        }
+    ]
+}
