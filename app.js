@@ -117,6 +117,11 @@ app.post('/webhook', function (req, res) {
   }
 });
 
+app.get('/setup', function (req, res) {
+  setupGetStartedButton();
+  AddPersistentMenu();
+});
+
 /*
  * Verify that the callback came from Facebook. Using the App Secret from 
  * the App Dashboard, we can verify the signature that is sent with each 
@@ -238,95 +243,21 @@ function handleReceivedMessage(event) {
     if((isStopped == true) && (messageText !== "start")){
       return;
     }
-  console.log("Received message for user %d and page %d at %d with message: %s", 
+    console.log("Received message for user %d and page %d at %d with message: %s", 
     senderID, recipientID, timeOfMessage,messageText);
 
     // If we receive a text message, check to see if it matches any special
     // keywords and send back the corresponding example. Otherwise, just echo
     // the text we received.
-    switch (messageText.toLowerCase()) {
-      case 'image':
-        sendImageMessage(senderID, "http://messengerdemo.parseapp.com/img/rift.png");
-        break;
+    //switch (messageText.toLowerCase()) {
+      
+    //  default:
+    //     sendEnteredMessage(senderID, messageText);
 
-      case 'gif':
-        sendGifMessage(senderID);
-        break;
-
-      case 'audio':
-        sendAudioMessage(senderID);
-        break;
-
-      case 'video':
-        sendVideoMessage(senderID);
-        break;
-
-      case 'file':
-        sendFileMessage(senderID);
-        break;
-
-      case 'button':
-        sendButtonMessage(senderID);
-        break;
-
-      case 'generic':
-        sendGenericMessage(senderID);
-        break;
-
-      case 'receipt':
-        sendReceiptMessage(senderID);
-        break;
-
-      case 'quick reply':
-        sendQuickReply(senderID);
-        break        
-
-      case 'read receipt':
-        sendReadReceipt(senderID);
-        break        
-
-      case 'typing on':
-        sendTypingOn(senderID);
-        break        
-
-      case 'typing off':
-        sendTypingOff(senderID);
-        break        
-
-      case 'user info':
-        if(firstName)
-            sendTextMessage(senderID,firstName);
-        break        
-
-      case 'add menu':
-        addPersistentMenu();
-        break        
-
-      case 'remove menu':
-        removePersistentMenu();
-        break        
-
-      case 'stop':  // Stop the Bot from responding if the admin sends this messages
-         if(senderID ==  1073962542672604) {
-            console.log("Stoppping bot");
-            isStopped = true;
-         }
-         break
-
-      case 'start': // start up again
-         if(senderID ==  1073962542672604)  {
-            console.log("Starting bot");
-            isStopped = false;
-         }
-         break
-
-      default:
-         sendEnteredMessage(senderID, messageText);
-
-    }
+    //}
   } else if (messageAttachments) {
-    if(messageAttachments[0].payload.url)
-        sendJsonMessage(senderID, messageAttachments[0].payload.url);
+    //if(messageAttachments[0].payload.url)
+    //    sendJsonMessage(senderID, messageAttachments[0].payload.url);
   }
 }
 
@@ -578,23 +509,11 @@ function sendCustomMessage(recipientId,messageText) {
 
 console.log("sendCustoMessage "+ messageText);
 
-    switch (messageText.toLowerCase()) {
+    switch (messageText()) {
 
-      case 'joke':
+      case 'JOKE':
         sendJoke(recipientId);
-        break        
-
-      case 'image':
-        sendRandomImage(recipientId);
-        break        
-
-      case 'who':
-        sendLocale(recipientId);
-        break        
-      
-      case 'add keyword':
-        addKeywordStep1(recipientId);
-        break        
+        break               
 
       case 'list keywords':
         sendKeywordList(recipientId);
@@ -684,12 +603,7 @@ function sendJoke(recipientId) {
         {
           "content_type":"text",
           "title":"Another 😂",
-          "payload":"joke"
-        },
-        {
-          "content_type":"text",
-          "title":"Home",
-          "payload":"home"
+          "payload":"JOKE"
         }
       ]
     }
@@ -1126,85 +1040,114 @@ function callGetLocaleAPI(event, handleReceived) {
     });
 }
 
+function setupGetStartedButton() {
 
-function addPersistentMenu(){
- request({
+  request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
     method: 'POST',
-    json:{
-  "get_started":{
-    "payload":"GET_STARTED_PAYLOAD"
-   }
- }
-}, function(error, response, body) {
+    json: {
+      "get_started": {
+        "payload": "GET_STARTED_PAYLOAD"
+      }
+    }
+  }, function (error, response, body) {
     console.log("Add persistent menu " + response)
     if (error) {
-        console.log('Error sending messages: ', error)
+      console.log('Error sending messages: ', error)
     } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
+      console.log('Error: ', response.body.error)
     }
-})
- request({
+  })
+  request({
     url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
     method: 'POST',
-    json:{
-"persistent_menu":[
-    {
-      "locale":"default",
-      "composer_input_disabled":true,
-      "call_to_actions":[
-        {
-          "title":"Home",
-          "type":"postback",
-          "payload":"HOME"
-        },
-        {
-          "title":"Nested Menu Example",
-          "type":"nested",
-          "call_to_actions":[
-            {
-              "title":"Who am I",
-              "type":"postback",
-              "payload":"WHO"
+    json: {
+      "greeting": [{
+        "locale": "default",
+        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
+      }, {
+        "locale": "en_US",
+        "text": "Hi! Thanks for getting in touch with us on Messenger. Please send us any questions. Please visit https://pheebrothers.com/ for more information."
+      },{
+        "locale": "zh_CN",
+        "text": "你好！欢迎来到彭兄弟食品工业官方。有什么问题请随时联络我们。更多详情请前往官方网站 https://pheebrothers.com/ 。"
+      }]
+    }
+  }, function (error, response, body) {
+    console.log("Add persistent menu " + response)
+    if (error) {
+      console.log('Error sending messages: ', error)
+    } else if (response.body.error) {
+      console.log('Error: ', response.body.error)
+    }
+  })
+}
+
+function AddPersistentMenu() {
+  request({
+    url: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
+    method: 'POST',
+    json: {
+      "persistent_menu": [{
+          "locale": "default",
+          "composer_input_disabled": false,
+          "call_to_actions": [{
+              "title": "Home",
+              "type": "postback",
+              "payload": "HOME"
             },
             {
-              "title":"Joke",
-              "type":"postback",
-              "payload":"joke"
+              "title": "Nested Menu Example",
+              "type": "nested",
+              "call_to_actions": [{
+                  "title": "Who am I",
+                  "type": "postback",
+                  "payload": "WHO"
+                },
+                {
+                  "title": "Joke",
+                  "type": "postback",
+                  "payload": "joke"
+                },
+                {
+                  "title": "Technical",
+                  "type": "postback",
+                  "payload": "technical"
+                }
+              ]
             },
             {
-              "title":"Contact Info",
-              "type":"postback",
-              "payload":"CONTACT"
+              "type": "web_url",
+              "title": "Latest News",
+              "url": "http://foxnews.com",
+              "webview_height_ratio": "full"
             }
           ]
         },
         {
-          "type":"web_url",
-          "title":"Latest News",
-          "url":"http://foxnews.com",
-          "webview_height_ratio":"full"
+          "locale": "zh_CN",
+          "composer_input_disabled": false
         }
       ]
-    },
-    {
-      "locale":"zh_CN",
-      "composer_input_disabled":false
-    }
-    ]
     }
 
-}, function(error, response, body) {
+  }, function (error, response, body) {
     console.log(response)
     if (error) {
-        console.log('Error sending messages: ', error)
+      console.log('Error sending messages: ', error)
     } else if (response.body.error) {
-        console.log('Error: ', response.body.error)
+      console.log('Error: ', response.body.error)
     }
-})
-
+  })
 }
 
 function removePersistentMenu(){
