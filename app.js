@@ -431,7 +431,7 @@ function handleReceivedMessage(event) {
           isStopped = false;
         }
         break */
-        
+
       case 'quick reply':
         sendQuickReply(senderID);
         break
@@ -902,54 +902,77 @@ function sendGenericMessage(recipientId) {
         "payload": {
           "template_type": "generic",
           "elements": [{
-              "title": "Bots",
-              "subtitle": "The rise of the Facebook Bot!",
-              "item_url": "http://www.dynamic-memory.com/",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/robot.png",
+              "title": "About Us",
+              "subtitle": "Phee Brothers Food Product",
+              "item_url": "https://www.pheebrothers.com/",
+              "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/home.png",
               "buttons": [{
                   "type": "postback",
-                  "title": "Make an Appointment",
-                  "payload": "appointment"
+                  "title": "Who Are We?",
+                  "payload": "Who Are We?"
                 },
                 {
                   "type": "postback",
-                  "title": "Your Business Bot",
-                  "payload": "business"
+                  "title": "What We Do?",
+                  "payload": "Product Categories"
                 },
                 {
                   "type": "postback",
-                  "title": "I want a Bot!",
-                  "payload": "I want one"
+                  "title": "Delivery Coverage",
+                  "payload": "Delivery Coverage"
                 }
               ]
             },
             {
-              "title": "DMS Software",
-              "subtitle": "Software Engineering is awesome",
-              "item_url": "http://www.dynamic-memory.com/",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/evolution.png",
+              "title": "Learn More",
+              "subtitle": "Find out more about us through a few available channels.",
+              "item_url": "https://www.pheebrothers.com/contact-us",
+              "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/reach_out.jpg",
               "buttons": [{
                   "type": "postback",
-                  "title": "Contact",
-                  "payload": "Contact"
+                  "title": "Company Location",
+                  "payload": "location"
                 },
                 {
-                  "type": "postback",
-                  "title": "Social media",
-                  "payload": "Social media"
+                  "type": "web_url",
+                  "title": "Instagram",
+                  "url": "https://www.instagram.com/pheebrothers/"
                 },
                 {
-                  "type": "postback",
-                  "title": "Matthew's bio",
-                  "payload": "bio"
+                  "type": "web_url",
+                  "title": "Website",
+                  "url": "https://pheebrothers.com/",
+                  "webview_height_ratio": "full"
                 }
               ]
             },
             {
-              "title": "Custom Examples",
-              "subtitle": "A few small apps to give an idea of the possibilites",
-              "item_url": "https://dynamic-memory.com",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/danger-man-at-work-hi.png",
+              "title": "Reach Out to Us",
+              "subtitle": "Send us your enquiries and what you want to know more about!",
+              "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/contact.jpg",
+              "buttons": [{
+                  "type": "web_url",
+                  "url": "https://pheebrothers.com/contact-us/",
+                  "title": "Email",
+                  "webview_height_ratio": "tall"
+                },
+                {
+                  "type": "web_url",
+                  "url": "https://wa.me/60104021500",
+                  "title": "Whatsapp",
+                  "webview_height_ratio": "tall"
+                },
+                {
+                  "type": "phone_number",
+                  "title": "Call Us",
+                  "payload": "+60104021500"
+                }
+              ]
+            },
+            {
+              "title": "Fun area!",
+              "subtitle": "Check out some jokes, random images & question about yourself!",
+              "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/fun.jpg",
               "buttons": [{
                   "type": "postback",
                   "title": "Tell me a joke 😜",
@@ -964,28 +987,6 @@ function sendGenericMessage(recipientId) {
                   "type": "postback",
                   "title": "Who am I?",
                   "payload": "who"
-                }
-              ]
-            },
-            {
-              "title": "Bot Examples",
-              "subtitle": "Some great bots",
-              "item_url": "https://developers.facebook.com/products/messenger/",
-              "image_url": "https://raw.githubusercontent.com/matthewericfisher/fb-robot/master/img/example.jpeg",
-              "buttons": [{
-                  "type": "web_url",
-                  "url": "https://www.messenger.com/t/HealthTap",
-                  "title": "Health Tap"
-                },
-                {
-                  "type": "web_url",
-                  "url": "http://www.messenger.com/t/EstherBot",
-                  "title": "Esther's cool bot"
-                },
-                {
-                  "type": "web_url",
-                  "url": "http://www.messenger.com/t/techcrunch",
-                  "title": "TechCrunch news bot"
                 }
               ]
             }
@@ -1019,12 +1020,11 @@ function sendLocation(recipientId) {
             "title": 'Phee Brothers Food Products Sdn Bhd',
             "image_url": "https://maps.googleapis.com/maps/api/staticmap?size=764x400&markers=color:red%7Cphee-brothers-food-product-sdn-bhd&maptype=roadmap&key=" + GOOGLEMAPS_API,
             "buttons": [{
-                "type": "web_url",
-                "url": "http://maps.apple.com/maps?q=phee-brothers-food-product-sdn-bhd",
-                "title": "View on Maps",
-                "webview_height_ratio": "tall"
-              }
-            ]
+              "type": "web_url",
+              "url": "http://maps.apple.com/maps?q=phee-brothers-food-product-sdn-bhd",
+              "title": "View on Maps",
+              "webview_height_ratio": "tall"
+            }]
           }]
         }
       }
@@ -1518,12 +1518,36 @@ function AddPersistentMenu() {
               "title": "View Website",
               "url": "http://pheebrothers.com",
               "webview_height_ratio": "full"
+            },
+            {
+              "type": "web_url",
+              "url": "https://wa.me/60104021500",
+              "title": "Whatsapp us",
+              "webview_height_ratio": "tall"
             }
           ]
         },
         {
           "locale": "zh_CN",
-          "composer_input_disabled": false
+          "composer_input_disabled": false,
+          "call_to_actions": [{
+              "title": "目录",
+              "type": "postback",
+              "payload": "HOME"
+            },
+            {
+              "type": "web_url",
+              "title": "官方网站",
+              "url": "http://pheebrothers.com",
+              "webview_height_ratio": "full"
+            },
+            {
+              "type": "web_url",
+              "url": "https://wa.me/60104021500",
+              "title": "联络我们",
+              "webview_height_ratio": "tall"
+            }
+          ]
         }
       ]
     }
