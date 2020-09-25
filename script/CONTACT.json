@@ -9,7 +9,7 @@
         "image_url": "https://raw.githubusercontent.com/wjphe1/fb-robot/master/img/contact.jpg",
         "buttons": [{
             "type": "web_url",
-            "url": "mailto:info@pheebrothers.com",
+            "url": "https://pheebrothers.com/contact-us/",
             "title": "Email",
             "webview_height_ratio": "tall"
           },
@@ -20,9 +20,9 @@
             "webview_height_ratio": "tall"
           },
           {
-            "type": "web_url",
-            "url": "tel:+60104021500",
-            "title": "Call us"
+            "type":"phone_number",
+            "title":"Call Us",
+            "payload":"+60104021500"
           }
         ]
       }]
